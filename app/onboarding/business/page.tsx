@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PhasePlaceholder } from "@/components/auth/PhasePlaceholder";
-import { getSession } from "@/lib/auth";
+import { LeafyBackground } from "@/components/woodland/LeafyBackground";
+import { getSellerContext } from "@/lib/seller";
+import { BusinessSurvey } from "./BusinessSurvey";
 
-// SPEC-NOTE: placeholder so Phase 2 sign-in has a real destination; built in Phase 4.
-export default async function Page() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  return <PhasePlaceholder title="Your treehouse" phase={4} session={session} />;
+export const metadata: Metadata = { title: "Open your treehouse · Tree Dorm" };
+
+export default async function BusinessOnboardingPage() {
+  const ctx = await getSellerContext();
+  if (!ctx) redirect("/onboarding/account-type");
+  if (ctx.shop) redirect("/seller");
+  return (
+    <LeafyBackground tone="carmel">
+      <BusinessSurvey />
+    </LeafyBackground>
+  );
 }

@@ -12,19 +12,29 @@ export async function AppHeader() {
           Tree Dorm
         </Link>
         {user && (
-          <Link
-            href="/profile"
-            aria-label="Your profile"
-            className="flex min-h-11 items-center gap-2 rounded-full py-1 pr-1 pl-3 font-semibold text-walnut hover:bg-almond"
-          >
-            <span className="hidden sm:inline">{user.name || "Profile"}</span>
-            <HedgehogAvatar
-              avatar={user.avatar}
-              variant="badge"
-              className="size-11 ring-2 ring-bark/20"
-              priority
-            />
-          </Link>
+          <div className="flex items-center gap-1">
+            {user.accountType === "business" && (
+              <Link
+                href="/seller"
+                className="min-h-11 content-center rounded-full px-3 font-semibold text-bark hover:bg-almond"
+              >
+                Your treehouse
+              </Link>
+            )}
+            <Link
+              href="/profile"
+              aria-label="Your profile"
+              className="flex min-h-11 items-center gap-2 rounded-full py-1 pr-1 pl-3 font-semibold text-walnut hover:bg-almond"
+            >
+              <span className="hidden sm:inline">{user.name || "Profile"}</span>
+              <HedgehogAvatar
+                avatar={user.avatar}
+                variant="badge"
+                className="size-11 ring-2 ring-bark/20"
+                priority
+              />
+            </Link>
+          </div>
         )}
       </div>
     </header>

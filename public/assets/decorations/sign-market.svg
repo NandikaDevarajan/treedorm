@@ -1,0 +1,8 @@
+<!-- PLACEHOLDER-ART: simple flat decoration for the category treehouse preview (SPEC §9.8). Replace with real art when available. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 44">
+  <path d="M14 2v6M46 2v6" stroke="#3E2B20" stroke-width="1.6"/>
+  <rect x="3" y="7" width="54" height="33" rx="5" fill="#A8703F" stroke="#3E2B20" stroke-width="1.8"/>
+  <rect x="7" y="10" width="46" height="27" rx="3.5" fill="#FFF8EC" stroke="#6B4226" stroke-width="1"/>
+  <path d="M7 34h46" stroke="#6B4226" stroke-width="0.8" opacity="0.4"/>
+  <g stroke="#3E2B20" stroke-width="1.5"><path d="M18 11h15l9 9-9 9H18z" fill="#E9876A"/><circle cx="22.5" cy="20" r="2" fill="#FFF8EC"/><path d="M27 17h8M27 23h6" stroke="#FFF8EC" stroke-width="1.6"/></g>
+</svg>

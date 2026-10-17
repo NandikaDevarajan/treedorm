@@ -12,7 +12,7 @@ Fill in the source and license for every image and font before making the repo p
 | National Park font (body, Google Fonts) | Google Fonts | SIL Open Font License 1.1 |
 | creatures/woodland creature animations.jpg | ? | ? — added by the team; source and license to confirm |
 | creatures/more woodland creature animations.jpg | ? | ? — added by the team; source and license to confirm |
-| accessories/hat-*.svg, foliage/vine-placeholder.svg | Drawn for this project | Project's own |
+| accessories/hat-*.svg, foliage/vine-placeholder.svg, decorations/*.svg | Drawn for this project | Project's own |
 
 Derived files (cut-outs, crops, icons — see INVENTORY.md) inherit the license of their source image:
 `creatures/cutouts/*-flat.png` and `foliage/leaf-*.png` come from "woodland creature animations.jpg"; `creatures/cutouts/*-soft.png` from "more woodland creature animations.jpg".

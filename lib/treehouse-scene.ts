@@ -25,7 +25,7 @@ export const CROPS = {
   landscape: { x: 110, y: 105, w: 560, h: 440 },
 } as const;
 
-export type Crop = (typeof CROPS)[keyof typeof CROPS];
+export type Crop = { x: number; y: number; w: number; h: number };
 
 const pct = (n: number) => `${+(n * 100).toFixed(3)}%`;
 

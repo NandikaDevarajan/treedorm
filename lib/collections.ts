@@ -1,5 +1,6 @@
 import type { Collection, ObjectId } from "mongodb";
 import type { Avatar } from "@/lib/avatar";
+import type { CategoryId } from "@/lib/categories";
 import { getDb } from "@/lib/db";
 import { SEED_SCHOOLS, type School } from "@/lib/schools";
 
@@ -35,6 +36,61 @@ export interface RateLimitDoc {
 
 export type SchoolDoc = School;
 
+export interface Photo {
+  url: string;
+  publicId: string;
+}
+
+export interface Availability {
+  day: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday
+  start: string; // "HH:mm"
+  end: string;
+}
+
+/** A treehouse (SPEC §6 shops). */
+export interface ShopDoc {
+  _id: ObjectId;
+  ownerId: ObjectId;
+  schoolDomain: string;
+  slug: string;
+  name: string;
+  category: CategoryId;
+  treehouseVariant: string;
+  tagline: string;
+  bio: string;
+  tags: string[];
+  priceRange: { min: number; max: number };
+  area: string;
+  availability: Availability[];
+  stats: { aiVerified: number; reviewCount: number; ratingAvg: number };
+  coverImage?: Photo;
+  /** What the seller wrote they offer (survey), kept for the AI and editing. */
+  offer: string;
+  /** True when the tagline/bio started as a Gemini draft (shown with a ✨ AI label, SPEC §4). */
+  aiAssisted: boolean;
+  createdAt: Date;
+}
+
+/** A product or service in a treehouse (SPEC §6 listings). */
+export interface ListingDoc {
+  _id: ObjectId;
+  shopId: ObjectId;
+  title: string;
+  description: string;
+  priceCents: number;
+  durationMin?: number;
+  photos: Photo[];
+  checkpoints: string[];
+  customTextAllowed: boolean;
+  tags: string[];
+  embedding?: number[];
+  active: boolean;
+  /** True when the text started as a Gemini draft. */
+  aiAssisted: boolean;
+  createdAt: Date;
+  publishedAt?: Date;
+}
+
 let indexes: Promise<unknown> | undefined;
 
 /** Creates the indexes auth depends on, once per server instance. Safe to call repeatedly. */
@@ -48,6 +104,10 @@ export function ensureIndexes(): Promise<unknown> {
       db.collection("rate_limits").createIndex({ key: 1 }, { unique: true }),
       db.collection("rate_limits").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
       db.collection("schools").createIndex({ domain: 1 }, { unique: true }),
+      db.collection("shops").createIndex({ slug: 1 }, { unique: true }),
+      db.collection("shops").createIndex({ ownerId: 1 }, { unique: true }),
+      db.collection("shops").createIndex({ schoolDomain: 1 }),
+      db.collection("listings").createIndex({ shopId: 1 }),
     ]);
   })().catch((err) => {
     indexes = undefined;
@@ -64,6 +124,8 @@ export async function collections() {
     otpCodes: db.collection<OtpDoc>("otp_codes"),
     rateLimits: db.collection<RateLimitDoc>("rate_limits"),
     schools: db.collection<SchoolDoc>("schools"),
+    shops: db.collection<ShopDoc>("shops"),
+    listings: db.collection<ListingDoc>("listings"),
   };
 }
 

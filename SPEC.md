@@ -137,7 +137,7 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
 - **App:** Next.js 14+ (App Router) + TypeScript + Tailwind. Screens and API routes in one project.
 - **Animation:** CSS transforms/opacity first; `framer-motion` for the door entrance, page transitions and avatar/treehouse previews. No video, no 3D.
 - **Hosting:** Vercel, auto-deploy on push to GitHub `main`.
-- **AI text + chat + listing writer + fallback vision:** Gemini via `@google/genai`. Default model `gemini-2.5-flash` (make it an env var).
+- **AI text + chat + listing writer + fallback vision:** Gemini via `@google/genai`. Default model `gemini-3.8-flash` via `GEMINI_MODEL` (SPEC-NOTE: `gemini-2.5-flash` is no longer served to new API keys), with low thinking for ~5s answers; if it's overloaded, `GEMINI_FALLBACK_MODELS` (default `gemini-3.5-flash,gemini-3.5-flash-lite`) are tried in order.
 - **Proof-photo check:** Perceptron API (vision + OCR).
 - **Payments:** Stripe test mode (`stripe`, `@stripe/stripe-js`, `@stripe/react-stripe-js`), PaymentIntents with `capture_method: "manual"`.
 - **Database:** MongoDB Atlas (`mongodb` driver, no ORM). Validate inputs with `zod`.
@@ -287,7 +287,7 @@ All routes: JSON in/out, `zod` validation, require session except `/api/auth/*`.
 
 ## 8. AI features
 
-Put all prompts in `lib/ai/prompts.ts`. Always request **JSON output** with a schema (`responseMimeType: "application/json"` + `responseSchema`), validate with `zod`, retry once on bad JSON, then fall back to a safe default. Never send emails, names, or room numbers to the model — only shop/listing content and the buyer's request.
+Put all prompts in `lib/ai/prompts.ts`. Always request **JSON output** with a schema (`responseMimeType: "application/json"` + `responseSchema`), validate with `zod`, retry once on bad JSON, then fall back to a safe default. On 503/429/500 (model overloaded) wait briefly once, then move to the next model in `GEMINI_FALLBACK_MODELS` before falling back (`lib/ai/gemini.ts`). Never send emails, names, or room numbers to the model — only shop/listing content and the buyer's request.
 
 ### 8.1 Shop Builder (Gemini)
 Input: survey answers + school name. Output:
@@ -506,6 +506,14 @@ The preview is prominent and **updates when the category changes**. Each categor
 - Implement as a **variant config** (`lib/treehouse-variants.ts`: `{ id, label, overlays[], tint?, signText? }`) so new categories are easy to add. "Other" = fallback.
 - The chosen variant is saved on the shop (`treehouseVariant`) and preserved when the profile is edited.
 - Keep it light: owners shouldn't configure lots of decorative settings.
+
+**As built (Phase 4):**
+- `/onboarding/business`: one question per screen — name → category → what you offer → price range → building/area + days & one time window → Gemini draft (tagline, bio, tags, each with a ✨ AI label, all editable, "Write it again") → "Open my treehouse". The live `TreehousePreview` stays visible on every step (top on phones, left on desktop) and re-decorates the moment the category changes. Room numbers are rejected in the area field (client and server, `lib/privacy.ts`).
+- Decorations are placeholder SVGs in `public/assets/decorations/` (marked `PLACEHOLDER-ART`), placed in scene pixels on `treehouse-main`: Beauty flower box, Food fruit basket, Fitness dumbbell sign, Photography camera + sign, Tutoring book stack, Crafts bunting + yarn, Reselling tag sign + parcel, Other none.
+- After saving, the seller goes straight to `/seller/listings/new`: add 1–5 photos (shrunk to ≤1600px on the phone, uploaded straight to Cloudinary with signed params scoped to `treedorm/listings/<shopId>`), optional notes → Listing Writer draft (title, description, price, tags, 3–5 photo checkpoints, custom-words toggle) → edit → Publish or Save as draft. Publishing needs at least one checkpoint.
+- `/t/[shopSlug]`: treehouse variant, name, tagline, 🌳 AI-verified and ⭐ review counts, category · area · price range, listings grid, About (with an "AI-assisted" label when the text started as a Gemini draft), When & where. Owners also see Add a listing / Seller dashboard.
+- `/seller`: treehouse summary and all listings (Live / Draft); drafts open in the same editor. The header shows "Your treehouse" for business accounts.
+- SPEC-NOTE: not yet built — editing the treehouse after creation (`/seller/shop`, `PATCH /api/shops/[id]`), listing detail pages (Phase 7), embeddings on publish (Phase 6).
 
 ### 9.9 Personal onboarding & hedgehog avatar (`/onboarding/avatar`, `/profile/avatar`)
 

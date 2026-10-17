@@ -51,7 +51,7 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 | foliage/vine-placeholder.svg | placeholder | `PLACEHOLDER-ART` heart-leaf vine matching the Shutterstock reference. Used by `VineBorder` via `VINE_SRC` — signup/login, styleguide, /market. viewBox includes every leaf so nothing clips |
 | foliage/leaf-maple-orange.png, leaf-maple-red.png, leaf-yellow.png, leaf-oak.png | derived | Autumn leaves cut from "woodland creature animations.jpg"; scattered, still, over the calm page backgrounds (`LeafyBackground`: home, signup, login, account type, 404); orange + yellow also drift down the homepage scene as its idle motion. Small source — keep under ~40px |
 | foliage/vine-branch.png | missing | Licensed transparent watercolor vine (preview in design/reference/). When added, change `VINE_SRC` in components/woodland/VineBorder.tsx |
-| decorations/ | empty | Category decorations come in Phase 4 |
+| decorations/flower-box.svg, food-basket.svg, camera.svg, books.svg, bunting.svg, yarn.svg, parcel.svg, sign-fitness.svg, sign-photo.svg, sign-market.svg | placeholder | `PLACEHOLDER-ART` category decorations for the treehouse variants (`lib/treehouse-variants.ts`): Beauty, Food, Fitness, Photography (camera + photo sign), Tutoring, Crafts (bunting + yarn), Reselling (market sign + parcel). Other has none |
 
 ## Fonts
 | File | Role |
