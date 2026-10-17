@@ -143,7 +143,8 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
 - **Database:** MongoDB Atlas (`mongodb` driver, no ORM). Validate inputs with `zod`.
 - **Photos:** Cloudinary (`cloudinary`). Mongo stores URLs + public IDs only.
 - **Buyer memory:** Backboard (behind `lib/memory.ts`), Mongo fallback.
-- **Auth:** custom email OTP + signed session cookie (`jose`). Email send via Resend if `RESEND_API_KEY` exists; otherwise in dev, log the code to server console and show it in a dev-only toast.
+- **Auth:** custom email OTP + signed session cookie (`jose`). The 6-digit code is sent by **real email via Resend** (`RESEND_API_KEY`) in the woodland style: cream card, the hedgehog (embedded inline), the code shown big and clear; subject **"Your Tree Dorm code"**. Without a key — or if a send fails outside production — the code is logged to the server console and shown in a dev-only toast. The dev-only demo login (§12) stays as a backup in case email is slow during the demo.
+- **Fonts:** `next/font/local` (Bloom Spring) and `next/font/google` (National Park), §9.3.
 - **Code + audit:** public GitHub repo, VEYZL runs on every PR.
 
 **Architecture rule:** phones only talk to our Next.js app. Only API routes call Gemini, Perceptron, Stripe, MongoDB, Cloudinary, Backboard. No API key is ever sent to the client except Stripe's publishable key.
@@ -162,7 +163,7 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
   accountType: "personal" | "business",
   roles: ("buyer" | "seller")[],      // personal → ["buyer"], business → ["buyer","seller"]
   shopId?: ObjectId,
-  avatar: { base: "hedgehog", hat: string | null, sunglasses: string | null },  // accessory ids from the asset manifest (§9.9); default all null
+  avatar: { base: "hedgehog", hat: string | null, sunglasses: string | null },  // base is ALWAYS "hedgehog" (§9.9); hat/sunglasses are accessory ids from the asset manifest; default null
   lookingFor?: string,                // personal survey answer
   createdAt: Date
 }
@@ -362,6 +363,8 @@ A **whimsical, cozy, woodland-fantasy marketplace**. Each business has its own p
 
 The whole site is one continuous world; each page is a different part of it (§9.11).
 
+**Mood references** (`design/reference/moods/`) set the vibe — see §9.16. They are for reference only and never appear in the app.
+
 **Asset-first:** the supplied images (§9.13) are the primary source of truth. Inspect all of them before designing. Reuse them rather than generating unrelated replacements. Some are meant to be layered, cropped, masked or animated — not used as full-page backgrounds. Preserve their style, proportions, colors and character designs; never stretch them or swap in unrelated stock art. If an exact asset or font is missing, build the closest faithful approximation and keep it easy to replace.
 
 ### 9.2 Colors
@@ -382,9 +385,10 @@ Use them with restraint: almond and cream give breathing room, browns anchor, gr
 ### 9.3 Typography, shapes, components
 
 **Fonts**
-- **Display: Bloom Spring Regular** (reference: https://www.1001fonts.com/cartoon+cursive+cute-fonts.html). For page titles, short whimsical headings, treehouse names, occasional decorative labels. **Verify the font file and its license before embedding.** If unavailable, use a similar rounded, playful display font (e.g. a Google Font) behind a single `--font-display` variable so it's a one-line swap.
-- **Body: a highly readable rounded sans-serif** (e.g. Nunito or Quicksand) for body text, form labels and inputs, navigation, search/filter controls, account info, buttons, validation messages.
+- **Display: Bloom Spring Regular** by Keithzo — loaded from `public/assets/fonts/Bloom Spring.otf` with `next/font/local` as **`--font-display`**. Only for page titles, short headings, treehouse names and decorative labels. License: free for personal use (see `CREDITS.md`).
+- **Body: National Park** — loaded from Google Fonts with `next/font/google` as **`--font-body`**. For all body text, labels, inputs, buttons, navigation, search and filters. It runs slightly tight on a phone, so body text is set at 17px with 1.6 line spacing.
 - Never use the display font for paragraphs or small labels.
+- **No eyebrow text, ever.** Never put a small label, kicker or tagline above a heading (e.g. "WELCOME BACK" over "Sign in"). Headings stand alone; any supporting label (like the school context on signup) goes *below* the heading.
 
 **Shapes & components**
 - Softly rounded corners, not sharp rectangles. Organic, irregular silhouettes for illustrated elements where it fits.
@@ -439,7 +443,7 @@ The account-access area of the woodland marketplace, with a **university-specifi
 - Searchable autocomplete of supported universities (from the `schools` collection). Selecting one re-themes the page immediately.
 - The `.edu` email entered must match the chosen university's domain; if a user types an email first, pre-select the matching school.
 - Apply the school's colors to **buttons, accent borders, selected states and small decorative details** only. Keep the warm woodland background, rounded components and illustrations.
-- Clear label: e.g. "Tree Dorm · UW signup".
+- Clear label: e.g. "Tree Dorm · UW signup" — shown as a small chip **below** the heading and intro, never above the heading (no eyebrow text, §9.3).
 
 **Example — University of Washington:** UW purple `#4B2E83` and gold `#B7A57A` on buttons, accent borders, selected states and small details; visible "UW signup" label; woodland illustrations stay. It should feel like *the woodland marketplace's UW edition*, not a UW website with a treehouse logo pasted on.
 
@@ -496,7 +500,7 @@ The preview is prominent and **updates when the category changes**. Each categor
 ### 9.9 Personal onboarding & hedgehog avatar (`/onboarding/avatar`, `/profile/avatar`)
 
 - Personal users complete their short survey, then may customize an avatar. **Customization is optional — "Skip for now" is always visible**, and finishing with the default is fine.
-- **Default character: the woodland hedgehog** from the "animated hedgehog" asset (§9.13). Preserve its facial features, proportions, colors, style and expression. Never replace it with an emoji, an unrelated cartoon hedgehog, or a newly generated character.
+- **Every user's avatar is the default hedgehog** (`hedgehog-default`, §9.13) — the only avatar base. Users can add a hat and/or sunglasses; nothing else changes. **No other creature or character (woodland creatures §9.15, woodland spirits, emoji, generated art) is ever a user avatar.** Preserve the hedgehog's facial features, proportions, colors, style and expression.
 - **Accessories:** hats and sunglasses from the supplied images.
 - Interface: live **avatar preview** + accessory browser. Users can view the default hedgehog, browse hats and sunglasses, select / deselect, preview on the hedgehog, change before saving, skip, or finish.
 - One hat and one pair of sunglasses at a time.
@@ -518,7 +522,8 @@ Should feel like you've successfully entered the woodland village — different 
 - **Results as small destinations in a woodland village**, not identical rectangular ecommerce cards: each `TreehouseTile` shows business name, category, a small treehouse illustration (its variant), short description, 🌳 AI-verified · ⭐ rating, and a clear "Enter" interaction. Keep the underlying layout consistent enough to scan and compare.
 - **Treehouse tile animation:** idle — subtle leaf sway or light movement; hover/focus — lifts or grows slightly, foliage moves, doorway becomes inviting; click — transitions toward an open-door / zoom into the storefront; reduced-motion — simple highlight/color change. Stagger and restrain idle motion when many are visible; never have every tile bouncing.
 - **Rebook strip** sits below search when the buyer has due rebooks (§10).
-- **Empty & loading states** with simple woodland illustrations (characters from the woodland-spirits sheet work well here): initial loading, search in progress, no matching results, no filters selected, filtered results. Never delay access to results with animation.
+- **Empty & loading states** with a woodland creature (§9.15): initial loading, search in progress, no matching results, no filters selected, filtered results. Never delay access to results with animation.
+- **A creature peeks out from behind the vines** at the top of the page (§9.15).
 
 **Storefront (`/t/[shopSlug]`):** the business's personalized treehouse identity (variant) at the top with matching woodland details, then stats, listings, about, availability. Entering it from a tile uses the lighter door/zoom transition.
 
@@ -561,7 +566,11 @@ Starting inventory (from the images supplied with this spec):
 | `public/assets/treehouse/treehouse-main.jpg` | Wooden cabin treehouse with red roof, arched door, ladder, big trunk, forest background | **"Another treehouse image" — homepage entrance scene** and base treehouse for tiles / storefront / category variants. *Confirm with the team this is the intended one.* |
 | `public/assets/treehouse/treehouse-hedgehog.webp` | Treehouse in a big oak with hanging vines and a hedgehog at the roots, warm sky | Secondary scene: login/signup and account-creation backgrounds, storefront header alternative; **vine/foliage source** for `VineBorder` (crop the hanging vines) |
 | `public/assets/characters/hedgehog-default.avif` | Hedgehog in an orange knit beanie holding a maple leaf, autumn leaves around | **Default personal avatar** ("animated hedgehog"). Needs a transparent cut-out (`hedgehog-default.png`) — background is solid. The beanie is part of the art: treat it as the default look and also extract it as the first hat accessory if feasible |
-| `public/assets/characters/woodland-spirits-sheet.jpg` | Sheet of 15 cute characters: mushroom friends, flower spirit, tiny dragon, owls, foxes, fairy rabbit, snail, hedgehogs, sprites, leaf creature, acorns, tree spirit | Crop into individual PNGs for empty/loading states, decorative details and category variant touches (e.g. flower spirit → Beauty, acorn → Food) |
+| `public/assets/characters/woodland-spirits-sheet.jpg` | Sheet of 15 cute characters: mushroom friends, flower spirit, tiny dragon, owls, foxes, fairy rabbit, snail, hedgehogs, sprites, leaf creature, acorns, tree spirit | Crop into individual PNGs for decorative details and category variant touches (e.g. flower spirit → Beauty, acorn → Food). Never avatars |
+| `public/assets/creatures/woodland creature animations.jpg` | Flat cartoon sticker sheet: owl, rabbit, hedgehog, bear, deer, bird, raccoon, squirrel, fox + trees, leaves, mushrooms (still drawings — "animations" is just the file name) | Crop animals into `creatures/cutouts/*-flat.png` for ambient decoration (§9.15) |
+| `public/assets/creatures/more woodland creature animations.jpg` | Soft cartoon sticker sheet: wolf, rabbit, owl, woodpecker, raccoon, hedgehog, fox, deer, bear, squirrel, moose | Crop into `creatures/cutouts/*-soft.png` for ambient decoration (§9.15) |
+| `public/assets/fonts/Bloom Spring.otf` | Display font by Keithzo | `--font-display` (§9.3) |
+| `design/reference/moods/*` | Painted forest scenes: sunlit paths, light rays, mushrooms, wildflowers, hollow-tree door | **Mood only** (§9.16). Never placed, cropped, traced or shipped |
 | `public/assets/accessories/sunglasses-sheet.jpg` | 8 pairs of wayfarer sunglasses (sunset palm reflections, black, green, blue/pink, clear blue) on white | Crop into 8 transparent PNGs `sunglasses-01..08.png` for the accessory picker |
 | `design/reference/vine-branch-shutterstock-preview.webp` | Watercolor vine: thin curving stem with heart-shaped green leaves tinged pink at the edges, on white — **watermarked Shutterstock preview** | **The intended vine for `VineBorder`** on the marketplace (and light leaf accents elsewhere). Don't ship the preview: license it, then save the clean file as `public/assets/foliage/vine-branch.png` (transparent background). Until then, use a placeholder SVG vine matching its shape and colors, marked `// PLACEHOLDER-ART` |
 | `design/reference/treehouse-envato-preview.jpg` | Treehouse with red flag on a hill — **watermarked stock preview** | Reference only. **Do not ship** (watermark, unlicensed) |
@@ -571,9 +580,10 @@ Starting inventory (from the images supplied with this spec):
 **Missing assets — approximate faithfully and keep swappable:**
 - **Hats:** only the hedgehog's beanie exists. Add 3–4 simple hats drawn in the same flat storybook style as SVG (`hat-*.svg`), clearly marked `// PLACEHOLDER-ART` so real art can replace them.
 - **Category decorations** (camera, books, sign, package, flowers…): small SVG overlays in the same style, or cropped characters from the spirits sheet.
+- **Creatures:** only the animals on the two supplied sheets. Never invent new characters.
 - **Separate door / foliage layers** for the entrance: hand-cut from `treehouse-main.jpg` (door crop, foreground leaf crop) — don't redraw the scene.
 
-**Handling rules:** use supplied images directly; preserve transparency; keep aspect ratios; position/crop deliberately; no duplicate files; consistent paths; convert to WebP/AVIF at sensible sizes for phones; for animation, use the original illustrations as layers. **Licensing:** this is a public repo — confirm each image's license allows use (stock sites like Freepik/Envato often require attribution or a paid license); list sources and attribution in `public/assets/CREDITS.md`. Same for the Bloom Spring font.
+**Handling rules:** use supplied images directly; preserve transparency; keep aspect ratios; position/crop deliberately; no duplicate files; consistent paths; convert to WebP/AVIF at sensible sizes for phones; for animation, use the original illustrations as layers. **Licensing:** this is a public repo — confirm each image's license allows use (stock sites like Freepik/Envato often require attribution or a paid license); list sources and attribution in `public/assets/CREDITS.md`. Same for fonts (Bloom Spring: free for personal use, by Keithzo; National Park: Open Font License, Google Fonts).
 
 ### 9.14 Design acceptance
 
@@ -582,9 +592,29 @@ Starting inventory (from the images supplied with this spec):
 **Account creation** — Personal and Business distinct and selectable; correct onboarding after selection; Carmel background; default avatar matches the supplied hedgehog; optional hats/sunglasses; skippable and editable later.
 **Business** — all 8 categories; restrained variant each; "Other" = default; preview updates live.
 **Marketplace** — Almond background; vines/foliage at top with subtle motion; themed search and filters; listings keep a treehouse identity; door entrance reused only for the right navigation.
-**Global** — supplied assets used (no unrelated replacements); consistent identity across pages; smooth, non-blocking animation; works on phone and desktop; reduced motion respected; text, forms and controls accessible.
+**Global** — Bloom Spring for display, National Park for body; no eyebrow text anywhere; every avatar is the hedgehog; creatures still, small and never over controls (≤2 on screen); mood references not shipped; supplied assets used (no unrelated replacements); consistent identity across pages; smooth, non-blocking animation; works on phone and desktop; reduced motion respected; text, forms and controls accessible.
 
 **Scope boundary:** this section is visual and frontend interaction. Don't rewrite backend, auth, database or API design to achieve it. Doors, account-type selection, university theming, avatar accessories and treehouse previews must actually work — not static mockups.
+
+
+### 9.15 Woodland creatures (ambient decoration)
+
+Small creatures sprinkled through the app for a cute, warm, homey feel. They are **still cartoon drawings: no movement, no idle animation, no entrance effects.**
+
+- **Source:** only the animals cut from the two sheets in `public/assets/creatures/` (`creatures/cutouts/*.png`). No invented characters. The hedgehogs on those sheets are not used — the hedgehog is reserved for user avatars (§9.9).
+- **Placements** (`lib/creatures.ts` → `CREATURE_FOR`):
+  - Marketplace: a squirrel peeking out from behind the vines (`VineBorder peeker`).
+  - Empty states: a rabbit greeting you (`EmptyState`).
+  - Loading screens: an eyes-closed deer dozing (`LoadingState`, `app/loading.tsx`).
+  - Photo check passed: a fox beside the result (Phase 8).
+  - Signup / login: an owl perched on the top edge of the sign-in card.
+- **Restraint:** small and occasional — **at most 1–2 visible at once**; never covering buttons, text or forms; decorative only (`alt=""`, `aria-hidden`, not interactive).
+- **Reduced motion:** they don't move, so nothing changes — they stay visible.
+- Every file and where it's used is listed in `public/assets/INVENTORY.md`; every source file is in `CREDITS.md`.
+
+### 9.16 Mood references (`design/reference/moods/`)
+
+Painted forest scenes for vibe only: **sunlit forest, soft light rays, winding dirt paths, red-and-white mushrooms, wildflowers, hollow-tree doors — cozy and warm.** Use them to guide colors, lighting, textures, decorative details and how the illustrated parts of the UI feel (e.g. warm golden light, soft dappled highlights, earthy path tones, small mushroom and wildflower accents). **Never place, crop, trace or ship these images**, and never import them from app code.
 
 ---
 
@@ -636,7 +666,7 @@ getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
 - Past orders for the demo buyer, including one haircut 30 days ago (rebook demo).
 - For `berkeley.edu`: 1 demo buyer + 2 shops ("Bear Bites Bakery" — Food, "Sather Snaps" — Photography) so the university-theme switch shows on signup/login in the demo.
 
-Login shortcut: in dev only (`NODE_ENV !== "production"`), `/login` shows "Use demo buyer / demo seller" buttons that skip OTP.
+Login shortcut: in dev only (`NODE_ENV !== "production"`), `/login` shows "Demo buyer / Demo seller" buttons that skip OTP — kept as a backup in case email is slow during the demo.
 
 ---
 
@@ -695,6 +725,7 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 BACKBOARD_API_KEY=
 RESEND_API_KEY=
+RESEND_FROM=Tree Dorm <onboarding@resend.dev>   # use an address on a verified domain to email any student
 APP_URL=http://localhost:3000
 ```
 App must boot and the demo must work with only `MONGODB_URI`, `SESSION_SECRET`, `GEMINI_API_KEY`, Stripe test keys, and Cloudinary. Everything else degrades gracefully.

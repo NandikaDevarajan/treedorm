@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR } from "@/lib/avatar";
 import { ObjectId } from "mongodb";
 import { cookies } from "next/headers";
 import { collections, type AccountType, type Role, type UserDoc } from "@/lib/collections";
@@ -38,7 +39,7 @@ export async function findOrCreateUser(email: string): Promise<{ user: UserDoc; 
     name: "",
     accountType: null,
     roles: ["buyer"],
-    avatar: { base: "hedgehog", hat: null, sunglasses: null },
+    avatar: DEFAULT_AVATAR,
     createdAt: new Date(),
   };
   try {

@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR } from "@/lib/avatar";
 import { apiError, parseBody } from "@/lib/api";
 import { rolesFor, sessionFromUser, setSessionCookie } from "@/lib/auth";
 import { collections } from "@/lib/collections";
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
         name: demo.name,
         accountType: demo.accountType,
         roles: rolesFor(demo.accountType),
-        avatar: { base: "hedgehog", hat: null, sunglasses: null },
+        avatar: DEFAULT_AVATAR,
         createdAt: new Date(),
       },
     },

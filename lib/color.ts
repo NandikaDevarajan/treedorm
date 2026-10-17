@@ -14,3 +14,18 @@ export function contrast(a: string, b: string): number {
 }
 
 export const isHex = (s: string) => /^#[0-9a-f]{6}$/i.test(s);
+
+/** Mixes `amount` (0–1) of colour `a` into colour `b`, for tints where CSS variables aren't available. */
+export function mix(a: string, b: string, amount: number): string {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(i, i + 2), 16);
+  return (
+    "#" +
+    [1, 3, 5]
+      .map((i) =>
+        Math.round(ch(a, i) * amount + ch(b, i) * (1 - amount))
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")
+  );
+}

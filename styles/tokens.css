@@ -2,6 +2,8 @@
  * Tree Dorm design tokens — SPEC §9.2 (colors) and §9.3 (fonts).
  * The single source of truth for colour values: components use the Tailwind utilities
  * mapped from these in app/globals.css (bg-almond, text-bark, …), never raw hex.
+ * lib/tokens.ts mirrors the hex values for places CSS variables can't reach (email HTML);
+ * lib/__tests__/tokens.test.ts fails if the two drift apart.
  */
 :root {
   --almond: #eaddca;
@@ -21,9 +23,8 @@
   --on-accent: var(--cream);
   --accent-2: var(--gold);
 
-  /* Fonts are loaded with next/font in app/layout.tsx, which sets the --font-*-face variables.
-     SPEC-NOTE: Bloom Spring's license isn't confirmed, so Sniglet (OFL, Google Fonts) stands in.
-     Swap the display face by changing only the next/font import in app/layout.tsx. */
-  --font-display-stack: var(--font-display-face), "Trebuchet MS", system-ui, sans-serif;
-  --font-body-stack: var(--font-body-face), system-ui, sans-serif;
+  /* Fonts (SPEC §9.3) are loaded with next/font in app/layout.tsx, which defines --font-display
+     (Bloom Spring, local file) and --font-body (National Park, Google Fonts). These stacks add fallbacks. */
+  --font-display-stack: var(--font-display), "Trebuchet MS", system-ui, sans-serif;
+  --font-body-stack: var(--font-body), system-ui, sans-serif;
 }

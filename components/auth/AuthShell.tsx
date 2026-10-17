@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Creature } from "@/components/woodland/Creature";
+import { SunRays } from "@/components/woodland/SunRays";
+import { CREATURE_FOR } from "@/lib/creatures";
 
 /** Woodland backdrop for /signup and /login: the vine-oak treehouse scene behind a cream card. */
 export function AuthShell({ children }: { children: ReactNode }) {
@@ -15,6 +18,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           sizes="100vw"
           className="object-cover object-[50%_30%]"
         />
+        <SunRays />
         {/* Soft fade into the almond page so the card never sits on a hard edge. */}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-almond sm:hidden" />
       </div>
@@ -26,7 +30,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
         >
           Tree Dorm
         </Link>
-        <main className="w-full max-w-md rounded-[2rem] border border-bark/15 bg-cream p-6 shadow-soft sm:p-8">
+        <main className="relative w-full max-w-md rounded-[2rem] border border-bark/15 bg-cream p-6 shadow-soft sm:p-8">
+          {/* Perched on the card's top edge, over the scenery — never over the form. */}
+          <Creature name={CREATURE_FOR.authCard} size={68} className="absolute -top-[60px] right-6" />
           {children}
         </main>
       </div>

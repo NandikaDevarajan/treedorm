@@ -1,10 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Sniglet } from "next/font/google";
+import { National_Park } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-// Display face is a stand-in for Bloom Spring (see styles/tokens.css SPEC-NOTE).
-const display = Sniglet({ variable: "--font-display-face", subsets: ["latin"], weight: ["400", "800"] });
-const body = Nunito({ variable: "--font-body-face", subsets: ["latin"] });
+// SPEC §9.3: Bloom Spring for titles, short headings, treehouse names and decorative labels only;
+// National Park for everything else.
+const display = localFont({
+  src: "../public/assets/fonts/Bloom Spring.otf",
+  variable: "--font-display",
+  display: "swap",
+});
+// Next has no fallback metrics for National Park, so skip its size-adjusted fallback.
+const body = National_Park({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
+  adjustFontFallback: false,
+});
 
 export const metadata: Metadata = {
   title: "Tree Dorm",

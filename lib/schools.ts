@@ -1,4 +1,5 @@
 import { contrast, isHex } from "@/lib/color";
+import { TOKENS } from "@/lib/tokens";
 
 export interface School {
   domain: string;
@@ -37,10 +38,7 @@ export const SEED_SCHOOLS: School[] = [
   },
 ];
 
-// Token values (styles/tokens.css) for the default woodland theme and contrast checks.
-const BARK = "#6B4226";
-const GOLD = "#D9B56D";
-const CREAM = "#FFF8EC";
+const { bark: BARK, gold: GOLD, cream: CREAM } = TOKENS;
 
 export interface UniversityTheme {
   name: string | null;

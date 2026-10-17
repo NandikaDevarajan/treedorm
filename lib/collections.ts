@@ -1,4 +1,5 @@
 import type { Collection, ObjectId } from "mongodb";
+import type { Avatar } from "@/lib/avatar";
 import { getDb } from "@/lib/db";
 import { SEED_SCHOOLS, type School } from "@/lib/schools";
 
@@ -14,7 +15,7 @@ export interface UserDoc {
   accountType: AccountType | null;
   roles: Role[];
   shopId?: ObjectId;
-  avatar: { base: "hedgehog"; hat: string | null; sunglasses: string | null };
+  avatar: Avatar; // always the hedgehog; only hat/sunglasses vary (SPEC §9.9)
   lookingFor?: string;
   createdAt: Date;
 }

@@ -1,5 +1,5 @@
 import { apiError, clientIp, parseBody } from "@/lib/api";
-import { sendCodeEmail } from "@/lib/email";
+import { sendCodeEmail } from "@/lib/email/send";
 import { issueCode } from "@/lib/otp";
 import { HOUR, rateLimit } from "@/lib/rate-limit";
 import { domainMatches, emailDomain } from "@/lib/schools";
@@ -25,8 +25,8 @@ export async function POST(req: Request) {
 
   try {
     const code = await issueCode(email);
-    const { devCode } = await sendCodeEmail(email, code);
-    return Response.json({ ok: true, ...(devCode && { devCode }) });
+    const { devCode, devReason } = await sendCodeEmail(email, code);
+    return Response.json({ ok: true, ...(devCode && { devCode, devReason }) });
   } catch (err) {
     console.error("auth/start", err);
     return apiError(502, "send_failed", "We couldn't send your code. Try again in a moment.");

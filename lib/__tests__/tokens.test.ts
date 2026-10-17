@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { contrast } from "@/lib/color";
+import { TOKENS } from "@/lib/tokens";
 
 // Reads the real token file so the test can't drift from what ships.
 const css = readFileSync(path.join(process.cwd(), "styles/tokens.css"), "utf8");
@@ -22,6 +23,11 @@ describe("design tokens (SPEC §9.2)", () => {
     expect(token("sage")).toMatch(/#a8b58a/i);
     expect(token("cream")).toMatch(/#fff8ec/i);
     expect(token("gold")).toMatch(/#d9b56d/i);
+  });
+
+  it("lib/tokens.ts mirrors tokens.css exactly", () => {
+    for (const [name, hex] of Object.entries(TOKENS))
+      expect(token(name).toLowerCase()).toBe(hex.toLowerCase());
   });
 
   // Text/background pairs the components actually use must pass WCAG AA (4.5:1 for body text).

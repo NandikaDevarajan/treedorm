@@ -35,6 +35,9 @@
     background: var(--almond);
     color: var(--walnut);
     font-family: var(--font-body-stack);
+    /* National Park runs a little tight at 16px on a phone; give it more room (SPEC §9.3). */
+    font-size: 1.0625rem;
+    line-height: 1.6;
     min-height: 100dvh;
     overflow-x: hidden;
   }

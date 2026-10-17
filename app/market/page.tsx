@@ -6,5 +6,5 @@ import { getSession } from "@/lib/auth";
 export default async function Page() {
   const session = await getSession();
   if (!session) redirect("/login");
-  return <PhasePlaceholder title="The village" phase={5} spirit="mushroom-friends" session={session} />;
+  return <PhasePlaceholder title="The village" phase={5} session={session} vines />;
 }

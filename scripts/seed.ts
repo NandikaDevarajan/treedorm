@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR } from "@/lib/avatar";
 /**
  * Seeds the database (SPEC §12). Idempotent: safe to re-run.
  *
@@ -34,7 +35,7 @@ async function main() {
         $setOnInsert: {
           _id: new ObjectId(),
           email: demo.email,
-          avatar: { base: "hedgehog", hat: null, sunglasses: null },
+          avatar: DEFAULT_AVATAR,
           createdAt: new Date(),
         },
       },

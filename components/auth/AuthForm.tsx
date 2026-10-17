@@ -51,7 +51,7 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [devCode, setDevCode] = useState<string | null>(null);
+  const [devCode, setDevCode] = useState<{ code: string; reason: string } | null>(null);
   const [resendIn, setResendIn] = useState(0);
 
   // Per-device convenience: re-theme to the last school used here. Storage can be unavailable.
@@ -93,11 +93,11 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
     setBusy(true);
     setError(null);
     try {
-      const res = await post<{ devCode?: string }>("/api/auth/start", {
+      const res = await post<{ devCode?: string; devReason?: string }>("/api/auth/start", {
         email: normalized,
         schoolDomain: school ?? undefined,
       });
-      setDevCode(res.devCode ?? null);
+      setDevCode(res.devCode ? { code: res.devCode, reason: res.devReason ?? "Dev only" } : null);
       setStep("code");
       setCode("");
       setResendIn(30);
@@ -150,21 +150,22 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
 
   return (
     <div style={themeStyle(theme)} className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
-        <p className="flex items-center gap-2 text-sm font-bold tracking-wide text-accent">
+      <header className="flex flex-col gap-2">
+        <h1 className="font-display text-5xl leading-none text-bark">
+          {mode === "signup" ? "Climb into Tree Dorm" : "Welcome back"}
+        </h1>
+        <p className="text-walnut/85">
+          {mode === "signup"
+            ? "Students only. We'll email a one-time code to your .edu address."
+            : "Enter your .edu email and we'll send you a code."}
+        </p>
+        {/* School context sits below the heading, never above it (SPEC §9.3: no eyebrow text). */}
+        <p className="flex w-fit items-center gap-2 rounded-full border-2 border-accent bg-cream px-3 py-1 text-sm font-bold text-accent">
           <span aria-hidden className="inline-flex h-2 w-6 overflow-hidden rounded-full">
             <span className="flex-1 bg-accent" />
             <span className="flex-1 bg-accent-2 ring-1 ring-walnut/15 ring-inset" />
           </span>
           Tree Dorm · {theme.short ? `${theme.short} ${verb}` : verb}
-        </p>
-        <h1 className="font-display text-4xl leading-tight text-bark">
-          {mode === "signup" ? "Climb into Tree Dorm" : "Welcome back"}
-        </h1>
-        <p className="text-walnut/80">
-          {mode === "signup"
-            ? "Students only. We'll email a one-time code to your .edu address."
-            : "Enter your .edu email and we'll send you a code."}
         </p>
       </header>
 
@@ -279,9 +280,6 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
 
       {demoLogin && mode === "login" && (
         <div className="flex flex-col gap-2 rounded-2xl border-2 border-dashed border-bark/30 p-3">
-          <p className="text-xs font-bold tracking-wide text-walnut/70 uppercase">
-            Dev only · skips the code
-          </p>
           <div className="grid grid-cols-2 gap-2" aria-label="Sign in as a demo account" role="group">
             <WoodButton variant="secondary" onClick={() => demo("buyer")} disabled={busy}>
               Demo buyer
@@ -290,6 +288,7 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
               Demo seller
             </WoodButton>
           </div>
+          <p className="text-center text-xs text-walnut/75">Dev only: skips the email code.</p>
         </div>
       )}
 
@@ -304,12 +303,12 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
           className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-2xl bg-walnut px-4 py-3 text-cream shadow-soft"
         >
           <span className="text-sm">
-            <span className="block text-xs text-cream/70">Dev only — no email service set up</span>
-            Your code: <strong className="font-mono text-lg tracking-widest">{devCode}</strong>
+            <span className="block text-xs text-cream/75">Dev only · {devCode.reason}</span>
+            Your code: <strong className="font-mono text-lg tracking-widest">{devCode.code}</strong>
           </span>
           <button
             type="button"
-            onClick={() => setCode(devCode)}
+            onClick={() => setCode(devCode.code)}
             className="min-h-11 rounded-xl bg-cream px-3 text-sm font-bold text-walnut"
           >
             Fill in

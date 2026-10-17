@@ -173,6 +173,12 @@ async function hedgehog() {
   removeBackground(raw, [254, 249, 243], 14);
   keepLargestComponent(raw);
   await writePng(raw, src("characters/hedgehog-default.png"));
+  // Small copy embedded inline in the sign-in email (lib/email.ts), kept light for inboxes.
+  await sharp(src("characters/hedgehog-default.png"))
+    .resize({ width: 240 })
+    .png({ compressionLevel: 9, palette: true })
+    .toFile(src("characters/hedgehog-email.png"));
+  console.log("  ✓ public/assets/characters/hedgehog-email.png");
 }
 
 const SPIRITS: string[][] = [
@@ -238,6 +244,62 @@ async function treehouse() {
   console.log("  ✓ public/assets/treehouse/door.png  (box 360,310 54×78 in treehouse-main)");
 }
 
+// Boxes found by labelling the sheets' blobs. Hedgehogs are deliberately skipped: the hedgehog is
+// reserved for user avatars (SPEC §9.9). The flat sheet's bear touches a tree, so the soft bear is used.
+const CREATURE_SHEETS: { file: string; style: string; animals: Record<string, Box> }[] = [
+  {
+    file: "creatures/woodland creature animations.jpg",
+    style: "flat",
+    animals: {
+      rabbit: { left: 165, top: 7, width: 75, height: 149 },
+      owl: { left: 90, top: 21, width: 75, height: 87 },
+      deer: { left: 209, top: 91, width: 125, height: 177 },
+      bird: { left: 121, top: 194, width: 82, height: 54 },
+      fox: { left: 304, top: 215, width: 123, height: 133 },
+      raccoon: { left: 31, top: 235, width: 96, height: 113 },
+      squirrel: { left: 130, top: 247, width: 97, height: 101 },
+    },
+  },
+  {
+    file: "creatures/more woodland creature animations.jpg",
+    style: "soft",
+    animals: {
+      wolf: { left: 15, top: 11, width: 95, height: 150 },
+      rabbit: { left: 127, top: 18, width: 73, height: 143 },
+      owl: { left: 233, top: 39, width: 79, height: 123 },
+      woodpecker: { left: 330, top: 24, width: 67, height: 138 },
+      raccoon: { left: 399, top: 26, width: 101, height: 107 },
+      fox: { left: 15, top: 169, width: 130, height: 158 },
+      deer: { left: 153, top: 156, width: 99, height: 171 },
+      bear: { left: 248, top: 167, width: 123, height: 160 },
+      squirrel: { left: 377, top: 201, width: 103, height: 127 },
+      moose: { left: 438, top: 140, width: 166, height: 187 },
+    },
+  },
+];
+
+async function creatures() {
+  console.log("woodland creatures");
+  for (const sheet of CREATURE_SHEETS) {
+    const meta = await sharp(src(sheet.file)).metadata();
+    for (const [name, box] of Object.entries(sheet.animals)) {
+      // Clamp padded boxes to the sheet edges.
+      const left = Math.max(0, box.left);
+      const top = Math.max(0, box.top);
+      const clamped = {
+        left,
+        top,
+        width: Math.min(box.width, meta.width! - left),
+        height: Math.min(box.height, meta.height! - top),
+      };
+      const raw = await loadRaw(src(sheet.file), clamped);
+      removeBackground(raw, [255, 255, 255], 18);
+      keepLargestComponent(raw);
+      await writePng(raw, src(`creatures/cutouts/${name}-${sheet.style}.png`));
+    }
+  }
+}
+
 /** PWA + favicon icons, cropped square around the cabin in treehouse-main. */
 async function icons() {
   console.log("app icons");
@@ -272,6 +334,7 @@ async function main() {
   await spirits();
   await sunglasses();
   await treehouse();
+  await creatures();
 }
 
 main().catch((err) => {
