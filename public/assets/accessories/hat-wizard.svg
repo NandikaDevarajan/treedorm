@@ -1,0 +1,9 @@
+<!-- PLACEHOLDER-ART: hand-drawn hat in the hedgehog's flat storybook style. Replace with real art when available. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 170">
+  <path d="M40 140 C70 120 82 60 96 20 C100 8 112 6 116 18 C126 50 136 110 162 140 Z" fill="#64764B" stroke="#3E2B20" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="100" cy="144" rx="88" ry="16" fill="#4F5E3B" stroke="#3E2B20" stroke-width="4"/>
+  <g fill="#D9B56D" stroke="#3E2B20" stroke-width="2">
+    <path d="M100 70 l4 9 10 1 -8 6 3 10 -9 -6 -9 6 3 -10 -8 -6 10 -1 z"/>
+    <circle cx="128" cy="112" r="5"/><circle cx="78" cy="118" r="4"/>
+  </g>
+</svg>

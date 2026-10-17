@@ -1,0 +1,14 @@
+<!-- PLACEHOLDER-ART: hand-drawn hat in the hedgehog's flat storybook style. Replace with real art when available. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 90">
+  <path d="M14 66 C60 46 140 46 186 66" stroke="#64764B" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <g stroke="#3E2B20" stroke-width="2.5">
+    <ellipse cx="40" cy="52" rx="12" ry="7" fill="#A8B58A" transform="rotate(-30 40 52)"/>
+    <ellipse cx="160" cy="52" rx="12" ry="7" fill="#A8B58A" transform="rotate(30 160 52)"/>
+    <ellipse cx="100" cy="36" rx="12" ry="7" fill="#A8B58A"/>
+  </g>
+  <g stroke="#3E2B20" stroke-width="2.5">
+    <g transform="translate(62 50)"><circle r="8" cy="-10" fill="#F2A6A0"/><circle r="8" cx="10" fill="#F2A6A0"/><circle r="8" cy="10" fill="#F2A6A0"/><circle r="8" cx="-10" fill="#F2A6A0"/><circle r="6" fill="#D9B56D"/></g>
+    <g transform="translate(138 50)"><circle r="8" cy="-10" fill="#FFF8EC"/><circle r="8" cx="10" fill="#FFF8EC"/><circle r="8" cy="10" fill="#FFF8EC"/><circle r="8" cx="-10" fill="#FFF8EC"/><circle r="6" fill="#D9B56D"/></g>
+    <g transform="translate(100 54)"><circle r="9" cy="-11" fill="#E9876A"/><circle r="9" cx="11" fill="#E9876A"/><circle r="9" cy="11" fill="#E9876A"/><circle r="9" cx="-11" fill="#E9876A"/><circle r="7" fill="#D9B56D"/></g>
+  </g>
+</svg>

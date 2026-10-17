@@ -1,0 +1,33 @@
+<!-- PLACEHOLDER-ART: stand-in for the licensed watercolor vine (design/reference/vine-branch-shutterstock-preview.webp).
+     Replace with public/assets/foliage/vine-branch.png once licensed; VineBorder reads the path from one constant. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" fill="none">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9DB57A"/>
+      <stop offset="0.75" stop-color="#7E9A5E"/>
+      <stop offset="1" stop-color="#C9907F"/>
+    </linearGradient>
+    <path id="heart" d="M0 0 C-14 -8 -22 -26 -12 -38 C-6 -45 2 -42 4 -34 C10 -42 20 -40 22 -30 C24 -16 12 -6 0 0 Z"/>
+  </defs>
+  <path d="M10 140 C90 120 140 92 210 86 C280 80 330 96 390 74 C450 52 500 40 560 22 C575 18 585 24 582 32 C579 40 568 38 570 30"
+        stroke="#7E9A5E" stroke-width="3" stroke-linecap="round"/>
+  <g fill="url(#leaf)" stroke="#5E7748" stroke-width="1.2" stroke-opacity="0.5">
+    <use href="#heart" transform="translate(62 128) rotate(-30)"/>
+    <use href="#heart" transform="translate(98 116) rotate(160) scale(0.9)"/>
+    <use href="#heart" transform="translate(140 100) rotate(-20) scale(1.05)"/>
+    <use href="#heart" transform="translate(178 92) rotate(170) scale(0.95)"/>
+    <use href="#heart" transform="translate(222 86) rotate(-10)"/>
+    <use href="#heart" transform="translate(262 84) rotate(175) scale(0.9)"/>
+    <use href="#heart" transform="translate(304 88) rotate(-15) scale(1.1)"/>
+    <use href="#heart" transform="translate(346 90) rotate(160) scale(0.95)"/>
+    <use href="#heart" transform="translate(392 72) rotate(-25) scale(1.05)"/>
+    <use href="#heart" transform="translate(432 60) rotate(165) scale(0.9)"/>
+    <use href="#heart" transform="translate(476 46) rotate(-30) scale(0.95)"/>
+    <use href="#heart" transform="translate(516 34) rotate(170) scale(0.8)"/>
+    <use href="#heart" transform="translate(548 26) rotate(-35) scale(0.75)"/>
+  </g>
+  <g stroke="#5E7748" stroke-opacity="0.45" stroke-width="1">
+    <path d="M62 128 l-9 -22"/><path d="M140 100 l-7 -24"/><path d="M222 86 l-4 -26"/>
+    <path d="M304 88 l-6 -26"/><path d="M392 72 l-11 -22"/><path d="M476 46 l-12 -20"/>
+  </g>
+</svg>

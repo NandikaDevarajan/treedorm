@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@theme inline {
+  --color-almond: var(--almond);
+  --color-carmel: var(--carmel);
+  --color-bark: var(--bark);
+  --color-walnut: var(--walnut);
+  --color-leaf: var(--leaf);
+  --color-sage: var(--sage);
+  --color-cream: var(--cream);
+  --color-gold: var(--gold);
+
+  --font-display: var(--font-display-stack);
+  --font-sans: var(--font-body-stack);
+}
+
+@theme {
+  --radius-card: 1.5rem;
+  --shadow-soft: 0 2px 0 rgb(62 43 32 / 0.08), 0 8px 24px -12px rgb(62 43 32 / 0.25);
+  --ease-organic: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--almond);
+    color: var(--walnut);
+    font-family: var(--font-body-stack);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--bark);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility px-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* Idle vine sway (VineBorder). Gentle and slow; off entirely for reduced motion. */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-1.2deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
