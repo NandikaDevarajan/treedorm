@@ -10,6 +10,7 @@
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { DOOR, RAILING } from "../lib/treehouse-scene";
 
 const ASSETS = path.join(process.cwd(), "public/assets");
 const src = (p: string) => path.join(ASSETS, p);
@@ -201,12 +202,7 @@ async function treehouse() {
   const main = src("treehouse/treehouse-main.jpg");
   await sharp(main).webp({ quality: 85 }).toFile(src("treehouse/treehouse-main.webp"));
   console.log("  ✓ public/assets/treehouse/treehouse-main.webp");
-  // Door layer for DoorTransition (Phase 1) — aligned to this box in the 740×636 scene.
-  await sharp(main)
-    .extract({ left: 360, top: 310, width: 54, height: 78 })
-    .png()
-    .toFile(src("treehouse/door.png"));
-  console.log("  ✓ public/assets/treehouse/door.png  (box 360,310 54×78 in treehouse-main)");
+  await doorLayers(main);
 }
 
 // Boxes found by labelling the sheets' blobs. Hedgehogs are deliberately skipped: the hedgehog is
@@ -281,6 +277,59 @@ async function leaves() {
     keepLargestComponent(raw);
     await writePng(raw, src(`foliage/${name}.png`), 2);
   }
+}
+
+/**
+ * Two layers for the homepage door entrance (SPEC §9.5), both the size of the DOOR box:
+ *  - door-panel.png: the golden door with the railing painted out, so it can swing open on its hinge;
+ *  - door-railing.png: just the railing in front of the door, which stays put while the door swings.
+ */
+async function doorLayers(main: string) {
+  const box = { left: DOOR.x, top: DOOR.y, width: DOOR.w, height: DOOR.h };
+  const raw = await loadRaw(main, box);
+  const { width, height } = raw;
+  const panel = Buffer.from(raw.data);
+  const railing = Buffer.from(raw.data);
+  const inRailing = (x: number, y: number) =>
+    RAILING.some(
+      (r) => x + DOOR.x >= r.x && x + DOOR.x < r.x + r.w && y + DOOR.y >= r.y && y + DOOR.y < r.y + r.h,
+    );
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (!inRailing(x, y)) {
+        railing[i + 3] = 0;
+        continue;
+      }
+      // The masks are rectangles, so drop the bits of golden door caught inside them: the door is
+      // yellower (green/red ≥ 0.70) and less blue than the railing wood.
+      const [r, g, b] = [raw.data[i], raw.data[i + 1], raw.data[i + 2]];
+      if (g / r >= 0.7 && b / r < 0.32) railing[i + 3] = 0;
+      // Fill from the nearest door pixel: straight up for the rail (the door's grain is vertical),
+      // sideways for the posts.
+      let sx = x;
+      let sy = y;
+      while (sy > 0 && inRailing(x, sy)) sy--;
+      if (inRailing(x, sy)) {
+        sy = y;
+        while (sx < width - 1 && inRailing(sx, y)) sx++;
+      } else sx = x;
+      const j = (sy * width + sx) * 4;
+      panel[i] = raw.data[j];
+      panel[i + 1] = raw.data[j + 1];
+      panel[i + 2] = raw.data[j + 2];
+    }
+  }
+  const write = (buf: Buffer, name: string) =>
+    sharp(buf, { raw: { width, height, channels: 4 } })
+      .png()
+      .toFile(src(`treehouse/${name}`));
+  await write(panel, "door-panel.png");
+  await write(railing, "door-railing.png");
+  console.log(
+    `  ✓ public/assets/treehouse/door-panel.png + door-railing.png  (box ${DOOR.x},${DOOR.y} ${DOOR.w}×${DOOR.h})`,
+  );
 }
 
 /** PWA + favicon icons, cropped square around the cabin in treehouse-main. */

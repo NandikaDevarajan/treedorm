@@ -220,7 +220,7 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
               }}
               aria-invalid={!!error}
               aria-describedby={error ? "auth-error" : undefined}
-              className="min-h-14 w-full rounded-2xl border-2 border-bark/30 bg-cream px-4 text-center font-mono text-2xl tracking-[0.5em] text-walnut focus:border-accent focus:outline-none aria-[invalid=true]:border-danger"
+              className="min-h-14 w-full rounded-2xl border-2 border-bark/30 bg-cream px-4 text-center text-2xl font-semibold tracking-[0.5em] tabular-nums text-walnut focus:border-accent focus:outline-none aria-[invalid=true]:border-danger"
             />
           </div>
           {error && <ErrorText message={error} />}
@@ -295,7 +295,7 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
         >
           <span className="text-sm">
             <span className="block text-xs text-cream/75">Dev only · {devCode.reason}</span>
-            Your code: <strong className="font-mono text-lg tracking-widest">{devCode.code}</strong>
+            Your code: <strong className="text-lg tracking-widest tabular-nums">{devCode.code}</strong>
           </span>
           <button
             type="button"

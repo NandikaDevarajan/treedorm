@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { National_Park } from "next/font/google";
 import localFont from "next/font/local";
+import { EntranceGlow } from "@/components/EntranceGlow";
 import "./globals.css";
 
 // SPEC §9.3: Bloom Spring for big headings only (page titles, section headings, treehouse names);
@@ -34,7 +35,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="antialiased">{children}</body>
+      {/* suppressHydrationWarning: extensions like Grammarly add attributes to <body> before React hydrates.
+          body.className applies National Park directly, on top of the --font-body variable. */}
+      <body className={`${body.className} font-sans antialiased`} suppressHydrationWarning>
+        {children}
+        <EntranceGlow />
+      </body>
     </html>
   );
 }

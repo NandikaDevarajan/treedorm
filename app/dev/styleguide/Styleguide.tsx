@@ -229,16 +229,18 @@ export function Styleguide() {
                 />
                 <figcaption className="text-sm">hedgehog-default — the only avatar</figcaption>
               </figure>
-              <figure className="flex flex-col items-center gap-2">
-                <Image
-                  src="/assets/treehouse/door.png"
-                  alt="Treehouse door crop"
-                  width={54}
-                  height={78}
-                  className="h-24 w-auto rounded-md"
-                />
-                <figcaption className="text-sm">door.png</figcaption>
-              </figure>
+              {["door-panel", "door-railing"].map((layer) => (
+                <figure key={layer} className="flex flex-col items-center gap-2">
+                  <Image
+                    src={`/assets/treehouse/${layer}.png`}
+                    alt={`Homepage entrance layer: ${layer}`}
+                    width={36}
+                    height={68}
+                    className="h-24 w-auto rounded-md bg-sage/40"
+                  />
+                  <figcaption className="text-sm">{layer}.png</figcaption>
+                </figure>
+              ))}
             </div>
 
             <div>

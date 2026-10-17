@@ -17,6 +17,8 @@
 
   --font-display: var(--font-display-stack);
   --font-sans: var(--font-body-stack);
+  /* Tailwind's preflight puts this on <html>: National Park is the default for every element. */
+  --default-font-family: var(--font-body-stack);
 }
 
 @theme {
@@ -40,6 +42,24 @@
     line-height: 1.6;
     min-height: 100dvh;
     overflow-x: hidden;
+  }
+
+  /* Form controls and links don't reliably inherit fonts across browsers; name National Park
+     explicitly. Only elements with the font-display utility (big headings) use Bloom Spring. */
+  input,
+  button,
+  select,
+  textarea,
+  optgroup,
+  option,
+  a,
+  label,
+  dialog,
+  ::file-selector-button {
+    font-family: var(--font-body-stack);
+  }
+  ::placeholder {
+    font-family: var(--font-body-stack);
   }
 
   :focus-visible {
@@ -71,6 +91,24 @@
   }
 }
 
+/* Homepage idle: a leaf drifting down past the treehouse (SPEC §9.5). */
+@keyframes leaf-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.95;
+  }
+  85% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-3rem, 26rem) rotate(200deg);
+    opacity: 0;
+  }
+}
+
 @keyframes sheet-up {
   from {
     transform: translateY(100%);
@@ -88,5 +126,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Fades are fine with reduced motion (no spatial movement), so the entrance glow keeps a short one. */
+@media (prefers-reduced-motion: reduce) {
+  .allow-fade {
+    transition-duration: 300ms !important;
   }
 }

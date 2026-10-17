@@ -388,6 +388,7 @@ Use them with restraint: almond and cream give breathing room, browns anchor, gr
 - **Display: Bloom Spring Regular** by Keithzo — loaded from `public/assets/fonts/Bloom Spring.otf` with `next/font/local` as **`--font-display`**. **Only for big headings** — page titles, section headings, treehouse names. License: free for personal use (see `CREDITS.md`).
 - **Body: National Park** — loaded from Google Fonts with `next/font/google` as **`--font-body`**. For all body text, labels, inputs, buttons, navigation, search and filters. It runs slightly tight on a phone, so body text is set at 17px with 1.6 line spacing.
 - **Everything that isn't a big heading is National Park**: subtitles and the line under a heading, labels, inputs, placeholders, buttons, links, helper and validation text, chips, navigation, footers. Never use the display font for paragraphs, small labels or wordmark pills. Check National Park actually loads (not a system fallback) on every page.
+- **How it's enforced:** National Park is the default font on `<body>` (`next/font` class + `font-sans`) and Tailwind's `--default-font-family`, and is named explicitly on inputs, buttons, selects, textareas, links, labels, dialogs and placeholders (they don't reliably inherit). Only elements with the `font-display` utility use Bloom Spring. No `font-mono` or other system font anywhere — codes use National Park with `tabular-nums`. The app has its own `not-found` page so Next's default (system-font) 404 never shows.
 - **No eyebrow text, ever.** Never put a small label, kicker or tagline above a heading (e.g. "WELCOME BACK" over "Sign in"). Headings stand alone; any supporting label (like the school context on signup) goes *below* the heading.
 
 **Shapes & components**
@@ -432,6 +433,14 @@ Animation is a defining feature — it should feel like entering and exploring a
 7. **Destination:** marketplace (or the next page) revealed with a smooth fade or zoom.
 
 It must feel continuous. **Don't just enlarge the whole image until it blurs.** Inspect whether the art can be separated into: background foliage + sky, trunk, treehouse structure, door, foreground branches/leaves. If flattened, approximate with CSS transforms, clipping, scaling and layered overlays (e.g. a cropped door layer positioned over the door, foreground leaf layer at a different scale for parallax). Don't invent a different illustration. Target total length ~1.2–1.8s; skippable by tapping again.
+
+**As built (Phase 1):**
+- `TreehouseScene` frames `treehouse-main` tight: a portrait crop on phones, landscape from `md` (`lib/treehouse-scene.ts` holds the crops and door geometry). Phones: scene across the top, title/intro/CTAs below. Desktop: text left, large rounded scene right. Calm Almond `LeafyBackground` behind.
+- Layers cut from the art by `prepare-assets`: `door-panel.png` (door with the railing painted out) swings open on its left hinge in 3D; `door-railing.png` stays in front; a warm doorway (gold → bark → walnut) shows behind.
+- Sequence (~1.5s): door opens (0–420ms) → the whole frame zooms into the door (420–1220ms; 14× phone, 24× desktop) while a warm vignette centred on the door darkens the edges → warm light covers the screen (from 1000ms) → navigate at 1300ms. `EntranceGlow` (in the root layout) keeps the light up across the route change and fades it out only once the destination has rendered (not its loading screen). Tapping again skips straight there.
+- Idle: two small leaves drift down past the treehouse. No characters on the homepage.
+- Reduced motion: no door swing, zoom or drifting leaves — just a short warm fade, then navigate.
+- The door is a real `<button>` ("Open the door and enter the village"), first in tab order, with a visible focus ring; "Enter the village" plays the same entrance. Signed-out visitors land on `/login?next=/market`.
 
 If a user lands on `/market` directly or returns in an existing session, show the destination immediately or a much shorter transition.
 
@@ -580,7 +589,7 @@ Starting inventory (from the images supplied with this spec):
 - **Hats:** only the hedgehog's beanie exists. Add 3–4 simple hats drawn in the same flat storybook style as SVG (`hat-*.svg`), clearly marked `// PLACEHOLDER-ART` so real art can replace them.
 - **Category decorations** (camera, books, sign, package, flowers…): small SVG overlays in the same style. (The woodland spirits are not used.)
 - **Creatures:** only the animals on the two supplied sheets. Never invent new characters.
-- **Separate door / foliage layers** for the entrance: hand-cut from `treehouse-main.jpg` (door crop, foreground leaf crop) — don't redraw the scene.
+- **Separate door layers** for the entrance: hand-cut from `treehouse-main.jpg` (`door-panel.png`, `door-railing.png`; geometry in `lib/treehouse-scene.ts`) — don't redraw the scene.
 
 **Handling rules:** use supplied images directly; preserve transparency; keep aspect ratios; position/crop deliberately; no duplicate files; consistent paths; convert to WebP/AVIF at sensible sizes for phones; for animation, use the original illustrations as layers. **Licensing:** this is a public repo — confirm each image's license allows use (stock sites like Freepik/Envato often require attribution or a paid license); list sources and attribution in `public/assets/CREDITS.md`. Same for fonts (Bloom Spring: free for personal use, by Keithzo; National Park: Open Font License, Google Fonts).
 

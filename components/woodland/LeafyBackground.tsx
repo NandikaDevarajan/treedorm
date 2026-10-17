@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 // Fine paper grain: fractal noise tinted walnut. Tiles seamlessly; multiplied faintly over the base colour.
@@ -22,7 +22,7 @@ const LEAVES = [
     className: "bottom-[5%] left-[7%] sm:bottom-[12%] sm:left-[10%]",
   },
   { src: "leaf-oak", size: 32, rotate: -32, className: "hidden sm:block bottom-[20%] right-[9%]" },
-  { src: "leaf-maple-red", size: 30, rotate: 24, className: "hidden sm:block top-[38%] left-[6%]" },
+  { src: "leaf-maple-red", size: 30, rotate: 24, className: "hidden sm:block top-[30%] left-[3%]" },
   {
     src: "leaf-maple-red",
     size: 22,
@@ -31,16 +31,16 @@ const LEAVES = [
   },
 ] as const;
 
-interface Props {
+interface Props extends HTMLAttributes<HTMLDivElement> {
   tone?: "almond" | "carmel";
   children: ReactNode;
-  className?: string;
 }
 
 /** Calm warm page background (SPEC §9.11): Almond or Carmel, soft texture, a few scattered leaves. */
-export function LeafyBackground({ tone = "almond", children, className }: Props) {
+export function LeafyBackground({ tone = "almond", children, className, ...rest }: Props) {
   return (
     <div
+      {...rest}
       className={cn(
         "relative min-h-dvh overflow-hidden",
         tone === "almond" ? "bg-almond" : "bg-carmel",

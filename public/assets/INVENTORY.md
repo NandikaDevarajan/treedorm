@@ -9,8 +9,9 @@ re-run. Next `<Image>` serves everything as WebP/AVIF at the requested size, so 
 | File | Kind | Size | Role |
 |---|---|---|---|
 | treehouse/treehouse-main.jpg | source | 740×636 | Cartoon cabin treehouse (red roof, arched door, ladder, big trunk, pines, clear sky). Homepage entrance scene; base for tiles / storefront / category variants. *Still to confirm with the team that this is "another treehouse image".* |
-| treehouse/treehouse-main.webp | derived | 740×636 | Web copy of the above — use this in pages |
-| treehouse/door.png | derived | 54×78 | Door crop at box (360, 310, 54×78) of treehouse-main, for `DoorTransition` (Phase 1). Low-res: scale with care |
+| treehouse/treehouse-main.webp | derived | 740×636 | Web copy of the above — the homepage scene (`TreehouseScene`, cropped tight via `lib/treehouse-scene.ts`) |
+| treehouse/door-panel.png | derived | 36×68 | Door panel at box (368, 318) of treehouse-main with the railing painted out; swings open in the homepage entrance |
+| treehouse/door-railing.png | derived | 36×68 | Just the railing in front of the door (rest transparent); stays in front while the door swings |
 | treehouse/treehouse-hedgehog.webp | source | 800×436 | Line-art treehouse in a vine-covered oak, hedgehog at the roots. Storefront header alternative (later phase). **No longer behind signup/login** |
 
 ## Characters
@@ -46,7 +47,7 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 | File | Kind | Role |
 |---|---|---|
 | foliage/vine-placeholder.svg | placeholder | `PLACEHOLDER-ART` heart-leaf vine matching the Shutterstock reference. Used by `VineBorder` via `VINE_SRC` — signup/login, styleguide, /market. viewBox includes every leaf so nothing clips |
-| foliage/leaf-maple-orange.png, leaf-maple-red.png, leaf-yellow.png, leaf-oak.png | derived | Autumn leaves cut from "woodland creature animations.jpg"; scattered, still, over the calm page backgrounds (`LeafyBackground`: signup, login, account type). Small source — keep under ~40px |
+| foliage/leaf-maple-orange.png, leaf-maple-red.png, leaf-yellow.png, leaf-oak.png | derived | Autumn leaves cut from "woodland creature animations.jpg"; scattered, still, over the calm page backgrounds (`LeafyBackground`: home, signup, login, account type, 404); orange + yellow also drift down the homepage scene as its idle motion. Small source — keep under ~40px |
 | foliage/vine-branch.png | missing | Licensed transparent watercolor vine (preview in design/reference/). When added, change `VINE_SRC` in components/woodland/VineBorder.tsx |
 | decorations/ | empty | Category decorations come in Phase 4 |
 
