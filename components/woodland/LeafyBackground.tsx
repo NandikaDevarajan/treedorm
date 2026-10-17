@@ -42,7 +42,8 @@ export function LeafyBackground({ tone = "almond", children, className, ...rest 
     <div
       {...rest}
       className={cn(
-        "relative min-h-dvh overflow-hidden",
+        // overflow-clip (not hidden) so sticky children, like the avatar preview, still stick.
+        "relative min-h-dvh overflow-clip",
         tone === "almond" ? "bg-almond" : "bg-carmel",
         className,
       )}

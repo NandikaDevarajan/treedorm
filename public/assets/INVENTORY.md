@@ -40,7 +40,8 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 | File | Kind | Role |
 |---|---|---|
 | accessories/sunglasses-sheet.jpg | source | 8 wayfarers, 2 columns × 4 rows on white |
-| accessories/sunglasses-01..08.png | derived | Transparent crops, numbered row by row: 01 purple palm sunset, 02 black, 03 orange palm sunset, 04 green, 05 pink palm sunset, 06 blue/pink, 07 blue palm sunset, 08 clear blue |
+| accessories/sunglasses-01..08.png | derived | Transparent crops, used by the avatar picker (labels in manifest.json), numbered row by row: 01 purple palm sunset, 02 black, 03 orange palm sunset, 04 green, 05 pink palm sunset, 06 blue/pink, 07 blue palm sunset, 08 clear blue |
+| accessories/manifest.json | data | Where each hat/sunglasses sits on the hedgehog (centre x/y and width as % of the hedgehog image, rotation in degrees). Read by `lib/avatar.ts` → `HedgehogAvatar` |
 | accessories/hat-acorn-cap.svg, hat-flower-crown.svg, hat-straw-sunhat.svg, hat-wizard.svg | placeholder | `PLACEHOLDER-ART` hats in a flat storybook style; replace with real art when available |
 
 ## Foliage & decorations

@@ -1,0 +1,142 @@
+{
+  "base": {
+    "src": "/assets/characters/hedgehog-default.png",
+    "width": 418,
+    "height": 562
+  },
+  "note": "x, y = the accessory's centre, as % of the hedgehog image's width and height. width = % of the hedgehog's width (height follows the accessory's own aspect). rotate = degrees clockwise, about the centre. Hats sit over the hedgehog's baked-in beanie.",
+  "accessories": [
+    {
+      "id": "acorn-cap",
+      "type": "hat",
+      "label": "Acorn cap",
+      "src": "/assets/accessories/hat-acorn-cap.svg",
+      "aspect": 1.667,
+      "x": 55,
+      "y": 16,
+      "width": 84,
+      "rotate": 13
+    },
+    {
+      "id": "flower-crown",
+      "type": "hat",
+      "label": "Flower crown",
+      "src": "/assets/accessories/hat-flower-crown.svg",
+      "aspect": 2.222,
+      "x": 51,
+      "y": 31,
+      "width": 74,
+      "rotate": 13
+    },
+    {
+      "id": "straw-sunhat",
+      "type": "hat",
+      "label": "Straw sun hat",
+      "src": "/assets/accessories/hat-straw-sunhat.svg",
+      "aspect": 2.0,
+      "x": 54,
+      "y": 18,
+      "width": 112,
+      "rotate": 13
+    },
+    {
+      "id": "wizard",
+      "type": "hat",
+      "label": "Wizard hat",
+      "src": "/assets/accessories/hat-wizard.svg",
+      "aspect": 1.176,
+      "x": 58,
+      "y": 11,
+      "width": 92,
+      "rotate": 13
+    },
+    {
+      "id": "sunglasses-01",
+      "type": "sunglasses",
+      "label": "Purple sunset",
+      "src": "/assets/accessories/sunglasses-01.png",
+      "aspect": 2.861,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-02",
+      "type": "sunglasses",
+      "label": "Classic black",
+      "src": "/assets/accessories/sunglasses-02.png",
+      "aspect": 2.919,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-03",
+      "type": "sunglasses",
+      "label": "Orange sunset",
+      "src": "/assets/accessories/sunglasses-03.png",
+      "aspect": 2.89,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-04",
+      "type": "sunglasses",
+      "label": "Green",
+      "src": "/assets/accessories/sunglasses-04.png",
+      "aspect": 2.9,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-05",
+      "type": "sunglasses",
+      "label": "Pink sunset",
+      "src": "/assets/accessories/sunglasses-05.png",
+      "aspect": 2.89,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-06",
+      "type": "sunglasses",
+      "label": "Blue and pink",
+      "src": "/assets/accessories/sunglasses-06.png",
+      "aspect": 2.89,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-07",
+      "type": "sunglasses",
+      "label": "Blue sunset",
+      "src": "/assets/accessories/sunglasses-07.png",
+      "aspect": 2.89,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    },
+    {
+      "id": "sunglasses-08",
+      "type": "sunglasses",
+      "label": "Clear blue",
+      "src": "/assets/accessories/sunglasses-08.png",
+      "aspect": 2.89,
+      "x": 41.5,
+      "y": 50,
+      "width": 54,
+      "rotate": 10
+    }
+  ]
+}

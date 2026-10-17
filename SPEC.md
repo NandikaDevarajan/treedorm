@@ -520,6 +520,14 @@ The preview is prominent and **updates when the category changes**. Each categor
 - **Always editable later** from Profile → Edit avatar.
 - Desktop: preview beside the controls. Mobile: preview stays visible (sticky top) while accessories scroll in a bottom sheet.
 
+**As built (Phase 3):**
+- Flow: account type → `/onboarding/personal` (name + "what are you usually looking for?" category chips; saved to `users.name` / `users.lookingFor` as readable text) → `/onboarding/avatar` → the village. "Skip for now" goes on without saving.
+- `public/assets/accessories/manifest.json`: `x`/`y` are the accessory's **centre** as % of the hedgehog image, `width` is % of its width, `rotate` is degrees clockwise (the head tilts ~10–13°). Fits were checked visually for all 4 hats and 8 sunglasses.
+- The hedgehog's orange beanie is part of the art, so **hats sit over the beanie** (bits of it can show at the edges, e.g. beside the wizard hat's cone). Hats are layered above sunglasses.
+- `HedgehogAvatar` renders `full` (whole hedgehog, with headroom for tall hats) or `badge` (round crop on the face, used in `AppHeader`). `AccessoryPicker` has Hats / Sunglasses tabs, a "None" option, and tapping a selected item again takes it off.
+- `AvatarEditor` is shared by `/onboarding/avatar` (Save my hedgehog / Skip for now) and `/profile/avatar` (Save changes / Cancel). `PUT /api/me/avatar` only accepts `base: "hedgehog"`.
+- `AppHeader` (Tree Dorm link + avatar badge → `/profile`) is on `/market`, `/profile` and `/profile/avatar`.
+
 ### 9.10 Marketplace search & filter (`/market`)
 
 Should feel like you've successfully entered the woodland village — different from the homepage, same illustrated style.
