@@ -1,12 +1,12 @@
 import Image from "next/image";
 import { cn } from "@/lib/cn";
-import { accessoryFit, AVATAR_BASE_SIZE, type Avatar } from "@/lib/avatar";
+import { accessoryFit, AVATAR_BARE_BASE, AVATAR_BASE_SIZE, type Avatar } from "@/lib/avatar";
 
 /*
  * The avatar canvas is the hedgehog image plus room around it for hats that rise above the head or
  * brims wider than the body. Manifest positions are % of the hedgehog image; these convert them.
  */
-const PAD_X = 0.1; // each side, as a fraction of the hedgehog's width
+const PAD_X = 0.16; // each side, as a fraction of the hedgehog's width
 const PAD_TOP = 0.24; // above, as a fraction of the hedgehog's height
 const CANVAS_W = 1 + 2 * PAD_X;
 const CANVAS_H = 1 + PAD_TOP;
@@ -38,7 +38,7 @@ function Layers({ avatar, priority }: { avatar: Avatar; priority?: boolean }) {
         }}
       >
         <Image
-          src={AVATAR_BASE_SIZE.src}
+          src={avatar.hat ? AVATAR_BARE_BASE.src : AVATAR_BASE_SIZE.src}
           alt=""
           fill
           priority={priority}

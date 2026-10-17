@@ -19,6 +19,7 @@ re-run. Next `<Image>` serves everything as WebP/AVIF at the requested size, so 
 |---|---|---|
 | characters/hedgehog-default.avif | source | Hedgehog in orange beanie holding a maple leaf, cream background with scattered leaves |
 | characters/hedgehog-default.png | derived | Transparent cut-out (background + loose leaves removed). **The only avatar base — every user is this hedgehog** (+ optional hat/sunglasses). Beanie is baked in |
+| characters/hedgehog-bare.png | derived | The hedgehog with the beanie removed and a quill head top painted in; the avatar base whenever a hat is worn |
 | characters/hedgehog-email.png | derived | 240px copy embedded inline in the sign-in email (lib/email) |
 
 ## Woodland creatures (SPEC §9.15)

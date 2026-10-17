@@ -50,6 +50,8 @@ export interface AccessoryFit {
 }
 
 export const AVATAR_BASE_SIZE = manifest.base as { src: string; width: number; height: number };
+/** The hedgehog with its beanie removed; used whenever a hat is worn so no beanie shows around it. */
+export const AVATAR_BARE_BASE = manifest.bareBase as { src: string; width: number; height: number };
 export const ACCESSORIES = manifest.accessories as AccessoryFit[];
 export const HAT_FITS = ACCESSORIES.filter((a) => a.type === "hat");
 export const SUNGLASSES_FITS = ACCESSORIES.filter((a) => a.type === "sunglasses");

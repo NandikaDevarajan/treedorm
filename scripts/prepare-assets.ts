@@ -177,6 +177,82 @@ async function hedgehog() {
   console.log("  ✓ public/assets/characters/hedgehog-email.png");
 }
 
+/**
+ * The hedgehog without its beanie, used whenever a hat is worn so no beanie shows around the hat
+ * (SPEC §9.9). Beanie pixels above the rim are removed (the ears, drawn in front of the beanie, are
+ * protected), and a spiky quill dome in the hedgehog's own browns is painted behind as the head top.
+ */
+async function hedgehogBare() {
+  console.log("hedgehog without beanie");
+  const file = src("characters/hedgehog-default.png");
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: W, height: H } = info;
+  const ears = [
+    { cx: 0.215, cy: 0.345, rx: 0.06, ry: 0.055 },
+    { cx: 0.715, cy: 0.44, rx: 0.07, ry: 0.065 },
+  ];
+  const inEar = (x: number, y: number) =>
+    ears.some((e) => ((x / W - e.cx) / e.rx) ** 2 + ((y / H - e.cy) / e.ry) ** 2 <= 1);
+  // Salmon knit, pale knit highlights and the dark-orange outline — but not cream face or brown quills.
+  const isBeanie = (r: number, g: number, b: number) => r >= 185 && g / r < 0.77 && b < 0.64 * r;
+  // The new head top: a dome centred on the face (also used to clean up around it).
+  const cx = 0.49 * W,
+    cy = 0.41 * H,
+    rx = 0.36 * W,
+    ry = 0.235 * H;
+  const outsideDome = (x: number, y: number) =>
+    ((x - cx) / (rx * 1.06)) ** 2 + ((y - cy) / (ry * 1.06)) ** 2 > 1;
+
+  for (let y = 0; y < Math.round(H * 0.47); y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      if (data[i + 3] === 0 || inEar(x, y)) continue;
+      const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
+      // Also the beanie's soft anti-aliased edge: pale and partly transparent (quill edges are dark).
+      // Plus the near-white halo the original cut-out left around the beanie (face cream is darker).
+      const halo = r > 228 && g > 212 && b > 192;
+      // Above the rim and outside the new dome, only the body's brown quills belong.
+      // (Higher up, nothing belongs outside the dome at all.)
+      const strayAboveHead = outsideDome(x, y) && (y < 0.3 * H || (y < 0.42 * H && r > 160));
+      if (isBeanie(r, g, b) || halo || strayAboveHead || (a < 255 && r > 170 && g > 120 && b > 80))
+        data[i + 3] = 0;
+    }
+  }
+
+  // Quill dome: an arc of alternating long/short spikes, filled with the body's quill brown.
+  const pts: string[] = [];
+  for (let k = 0, a = 188; a <= 352; a += 6, k++) {
+    const t = (a * Math.PI) / 180,
+      f = k % 2 ? 0.9 : 1.02;
+    pts.push(`${(cx + rx * f * Math.cos(t)).toFixed(1)},${(cy + ry * f * Math.sin(t)).toFixed(1)}`);
+  }
+  const streaks = [
+    [0.3, 0.3, 0.27, 0.25],
+    [0.4, 0.25, 0.39, 0.2],
+    [0.52, 0.24, 0.53, 0.19],
+    [0.63, 0.27, 0.66, 0.22],
+    [0.73, 0.32, 0.77, 0.28],
+    [0.22, 0.37, 0.18, 0.33],
+    [0.46, 0.3, 0.45, 0.26],
+    [0.58, 0.31, 0.6, 0.27],
+  ]
+    .map(([x1, y1, x2, y2]) => `<path d="M${x1 * W} ${y1 * H} L${x2 * W} ${y2 * H}" />`)
+    .join("");
+  const dome = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+    <polygon points="${pts.join(" ")} ${(cx + rx * 0.95).toFixed(1)},${(cy + 0.06 * H).toFixed(1)} ${(cx - rx * 0.95).toFixed(1)},${(cy + 0.06 * H).toFixed(1)}"
+      fill="rgb(117,73,48)" stroke="rgb(92,52,30)" stroke-width="3" stroke-linejoin="round" />
+    <g stroke="rgb(170,112,78)" stroke-width="5" stroke-linecap="round">${streaks}</g>
+  </svg>`;
+  const top = await sharp(data, { raw: { width: W, height: H, channels: 4 } })
+    .png()
+    .toBuffer();
+  await sharp(Buffer.from(dome))
+    .composite([{ input: top }])
+    .png({ compressionLevel: 9 })
+    .toFile(src("characters/hedgehog-bare.png"));
+  console.log("  ✓ public/assets/characters/hedgehog-bare.png");
+}
+
 async function sunglasses() {
   console.log("sunglasses");
   // 2 columns × 4 rows; numbered row by row (01 = top-left palm sunset, 02 = top-right black, …).
@@ -363,6 +439,7 @@ async function icons() {
 async function main() {
   await icons();
   await hedgehog();
+  await hedgehogBare();
   await sunglasses();
   await treehouse();
   await creatures();
