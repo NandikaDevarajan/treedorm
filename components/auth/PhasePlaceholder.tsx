@@ -15,12 +15,12 @@ export function PhasePlaceholder({
   title: string;
   phase: number;
   session: Session;
-  /** Show the marketplace vine band with its peeking creature. */
+  /** Show the marketplace vine band. */
   vines?: boolean;
 }) {
   return (
     <>
-      {vines && <VineBorder peeker className="absolute inset-x-0 top-0" />}
+      {vines && <VineBorder className="absolute inset-x-0 top-0" />}
       <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-safe py-10">
         <CreamCard>
           <EmptyState title={title}>

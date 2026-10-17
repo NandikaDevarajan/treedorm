@@ -71,7 +71,6 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
   // Theme follows the picked school, or the school the typed email belongs to.
   const themeSchool = school ?? schoolForEmail(email, schools)?.domain ?? null;
   const theme = getUniversityTheme(themeSchool, schools);
-  const verb = mode === "signup" ? "signup" : "log in";
 
   const onEmailChange = (value: string) => {
     setEmail(value);
@@ -151,21 +150,13 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
   return (
     <div style={themeStyle(theme)} className="flex flex-col gap-5">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-5xl leading-none text-bark">
+        <h1 className="font-display text-5xl leading-[1.05] text-bark">
           {mode === "signup" ? "Climb into Tree Dorm" : "Welcome back"}
         </h1>
         <p className="text-walnut/85">
           {mode === "signup"
             ? "Students only. We'll email a one-time code to your .edu address."
             : "Enter your .edu email and we'll send you a code."}
-        </p>
-        {/* School context sits below the heading, never above it (SPEC §9.3: no eyebrow text). */}
-        <p className="flex w-fit items-center gap-2 rounded-full border-2 border-accent bg-cream px-3 py-1 text-sm font-bold text-accent">
-          <span aria-hidden className="inline-flex h-2 w-6 overflow-hidden rounded-full">
-            <span className="flex-1 bg-accent" />
-            <span className="flex-1 bg-accent-2 ring-1 ring-walnut/15 ring-inset" />
-          </span>
-          Tree Dorm · {theme.short ? `${theme.short} ${verb}` : verb}
         </p>
       </header>
 
@@ -280,7 +271,7 @@ export function AuthForm({ mode, schools, next, intent, demoLogin }: Props) {
 
       {demoLogin && mode === "login" && (
         <div className="flex flex-col gap-2 rounded-2xl border-2 border-dashed border-bark/30 p-3">
-          <div className="grid grid-cols-2 gap-2" aria-label="Sign in as a demo account" role="group">
+          <div className="grid gap-2 sm:grid-cols-2" aria-label="Sign in as a demo account" role="group">
             <WoodButton variant="secondary" onClick={() => demo("buyer")} disabled={busy}>
               Demo buyer
             </WoodButton>

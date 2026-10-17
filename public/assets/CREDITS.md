@@ -16,6 +16,6 @@ Fill in the source and license for every image and font before making the repo p
 | accessories/hat-*.svg, foliage/vine-placeholder.svg | Drawn for this project | Project's own |
 
 Derived files (cut-outs, crops, icons — see INVENTORY.md) inherit the license of their source image:
-`creatures/cutouts/*-flat.png` come from "woodland creature animations.jpg"; `creatures/cutouts/*-soft.png` from "more woodland creature animations.jpg".
+`creatures/cutouts/*-flat.png` and `foliage/leaf-*.png` come from "woodland creature animations.jpg"; `creatures/cutouts/*-soft.png` from "more woodland creature animations.jpg".
 
 Mood references in `design/reference/moods/` are not shipped and are not credited here.

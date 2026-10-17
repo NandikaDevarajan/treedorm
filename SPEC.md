@@ -385,9 +385,9 @@ Use them with restraint: almond and cream give breathing room, browns anchor, gr
 ### 9.3 Typography, shapes, components
 
 **Fonts**
-- **Display: Bloom Spring Regular** by Keithzo — loaded from `public/assets/fonts/Bloom Spring.otf` with `next/font/local` as **`--font-display`**. Only for page titles, short headings, treehouse names and decorative labels. License: free for personal use (see `CREDITS.md`).
+- **Display: Bloom Spring Regular** by Keithzo — loaded from `public/assets/fonts/Bloom Spring.otf` with `next/font/local` as **`--font-display`**. **Only for big headings** — page titles, section headings, treehouse names. License: free for personal use (see `CREDITS.md`).
 - **Body: National Park** — loaded from Google Fonts with `next/font/google` as **`--font-body`**. For all body text, labels, inputs, buttons, navigation, search and filters. It runs slightly tight on a phone, so body text is set at 17px with 1.6 line spacing.
-- Never use the display font for paragraphs or small labels.
+- **Everything that isn't a big heading is National Park**: subtitles and the line under a heading, labels, inputs, placeholders, buttons, links, helper and validation text, chips, navigation, footers. Never use the display font for paragraphs, small labels or wordmark pills. Check National Park actually loads (not a system fallback) on every page.
 - **No eyebrow text, ever.** Never put a small label, kicker or tagline above a heading (e.g. "WELCOME BACK" over "Sign in"). Headings stand alone; any supporting label (like the school context on signup) goes *below* the heading.
 
 **Shapes & components**
@@ -443,9 +443,10 @@ The account-access area of the woodland marketplace, with a **university-specifi
 - Searchable autocomplete of supported universities (from the `schools` collection). Selecting one re-themes the page immediately.
 - The `.edu` email entered must match the chosen university's domain; if a user types an email first, pre-select the matching school.
 - Apply the school's colors to **buttons, accent borders, selected states and small decorative details** only. Keep the warm woodland background, rounded components and illustrations.
-- Clear label: e.g. "Tree Dorm · UW signup" — shown as a small chip **below** the heading and intro, never above the heading (no eyebrow text, §9.3).
+- **Show the university only through the accent colors and the university picker.** No school label, pill or badge (e.g. no "Tree Dorm · UW signup" chip).
+- **Background:** calm and warm — Almond (or Carmel) with a soft paper texture and a few scattered, still leaves (`LeafyBackground`), with the whole vine visible across the top (`VineBorder`). No busy illustrated scene, no characters on these pages.
 
-**Example — University of Washington:** UW purple `#4B2E83` and gold `#B7A57A` on buttons, accent borders, selected states and small details; visible "UW signup" label; woodland illustrations stay. It should feel like *the woodland marketplace's UW edition*, not a UW website with a treehouse logo pasted on.
+**Example — University of Washington:** UW purple `#4B2E83` and gold `#B7A57A` on buttons, accent borders, selected states and small details; the picker shows University of Washington; the woodland background stays. It should feel like *the woodland marketplace's UW edition*, not a UW website with a treehouse logo pasted on.
 
 **Reusable config, not per-school pages.** `lib/schools.ts` → `getUniversityTheme(domain)` returns `{ name, short, primary, secondary, accentBg?, logoUrl? }`. Logos only when an appropriate, permitted asset exists (none by default). Unknown university or unreliable colors → **default woodland theme** (no guessing).
 
@@ -468,7 +469,7 @@ Forms stay readable: cream fields, walnut text, visible focus rings in the schoo
 
 ### 9.7 Account creation — Personal vs Business (`/onboarding/account-type`)
 
-- Page background **Carmel `#C19A6B`**; the form lives on **cream cards** with dark brown text and green accents.
+- Page background **Carmel `#C19A6B`** with the same soft texture and scattered leaves (`LeafyBackground tone="carmel"`); the form lives on **cream cards** with dark brown text and green accents.
 - Two clearly distinct, selectable **AccountTypeCard**s:
   - **Personal** — cute character-centered illustration / hedgehog avatar preview; copy about browsing, discovering businesses and personalizing your character.
   - **Business** — treehouse-centered illustration / storefront preview; copy about creating a business identity and customizing your treehouse.
@@ -515,7 +516,7 @@ The preview is prominent and **updates when the category changes**. Each categor
 Should feel like you've successfully entered the woodland village — different from the homepage, same illustrated style.
 
 - **Background Almond `#EADDCA`** — a warm, softly lit woodland interior / parchment marketplace. Cream for cards, search and filter panels; Bark for headings and key controls; Leaf/Sage accents; Gold for subtle interactive highlights.
-- **Top decorative border (`VineBorder`):** vines and foliage along the top edge with organic curves and leaves, using the **watercolor vine** (`foliage/vine-branch.png`, §9.13) — repeat, flip and rotate copies along the top edge; the hedgehog-treehouse vines can fill gaps. Frames the page, never covers content. Gentle sway on a few leaves only — the whole border must not keep waving. A few vines may trail down the upper corners for a sheltered feel. Simplify/reduce on small screens.
+- **Top decorative border (`VineBorder`):** vines and foliage along the top edge with organic curves and leaves, using the **watercolor vine** (`foliage/vine-branch.png`, §9.13) — repeat, flip and rotate copies along the top edge; the hedgehog-treehouse vines can fill gaps. Frames the page, never covers content. **The whole vine is always fully inside the screen on phone and desktop** — never cropped by the top or side edges, including mid-sway (mirror copies flip about their centre). Gentle sway only — the whole border must not keep waving. Simplify/reduce on small screens.
 - **Entrance:** arriving from the homepage plays the door entrance (§9.5). Don't replay it on filter changes, opening a listing, or returning from a result. Direct URL / existing session → immediate or very short transition.
 - **Search bar:** wide, rounded, cream background, clear search icon, inviting placeholder ("Find a treehouse — haircuts, cakes, grad photos…"), visible focus state, real submit. It's functional, not decorative. Next to it: the **Ask Tree Dorm AI** entry (§8.3), styled as part of the same world.
 - **Filters:** rounded scrollable category chips (same eight categories as onboarding), compact dropdowns or a collapsible panel (bottom sheet on mobile). Selected = leaf-green or bark fill with contrasting text. Decorative foliage never overlaps inputs, filters, names or controls.
@@ -523,7 +524,6 @@ Should feel like you've successfully entered the woodland village — different 
 - **Treehouse tile animation:** idle — subtle leaf sway or light movement; hover/focus — lifts or grows slightly, foliage moves, doorway becomes inviting; click — transitions toward an open-door / zoom into the storefront; reduced-motion — simple highlight/color change. Stagger and restrain idle motion when many are visible; never have every tile bouncing.
 - **Rebook strip** sits below search when the buyer has due rebooks (§10).
 - **Empty & loading states** with a woodland creature (§9.15): initial loading, search in progress, no matching results, no filters selected, filtered results. Never delay access to results with animation.
-- **A creature peeks out from behind the vines** at the top of the page (§9.15).
 
 **Storefront (`/t/[shopSlug]`):** the business's personalized treehouse identity (variant) at the top with matching woodland details, then stats, listings, about, availability. Entering it from a tile uses the lighter door/zoom transition.
 
@@ -532,8 +532,8 @@ Should feel like you've successfully entered the woodland village — different 
 | Page | Primary visual identity |
 |---|---|
 | Homepage | Close-up treehouse illustration + cinematic entrance |
-| Signup / login | University accent colors + woodland styling |
-| Account creation | Carmel background, cream form surfaces, character / treehouse previews |
+| Signup / login | Calm Almond background (soft texture, a few leaves, whole vine at top) + university accent colors; no characters |
+| Account creation | Carmel background with soft texture and leaves, cream form surfaces, hedgehog / treehouse previews |
 | Personal profile customization | Default woodland hedgehog + accessory selection |
 | Business onboarding | Category-specific treehouse preview |
 | Marketplace search / filter | Almond background, vines, foliage, organized search controls |
@@ -564,10 +564,10 @@ Starting inventory (from the images supplied with this spec):
 | File | What it is | Role |
 |---|---|---|
 | `public/assets/treehouse/treehouse-main.jpg` | Wooden cabin treehouse with red roof, arched door, ladder, big trunk, forest background | **"Another treehouse image" — homepage entrance scene** and base treehouse for tiles / storefront / category variants. *Confirm with the team this is the intended one.* |
-| `public/assets/treehouse/treehouse-hedgehog.webp` | Treehouse in a big oak with hanging vines and a hedgehog at the roots, warm sky | Secondary scene: login/signup and account-creation backgrounds, storefront header alternative; **vine/foliage source** for `VineBorder` (crop the hanging vines) |
+| `public/assets/treehouse/treehouse-hedgehog.webp` | Treehouse in a big oak with hanging vines and a hedgehog at the roots, warm sky | Storefront header alternative. **Not** used behind signup/login (those use the calm `LeafyBackground`) |
 | `public/assets/characters/hedgehog-default.avif` | Hedgehog in an orange knit beanie holding a maple leaf, autumn leaves around | **Default personal avatar** ("animated hedgehog"). Needs a transparent cut-out (`hedgehog-default.png`) — background is solid. The beanie is part of the art: treat it as the default look and also extract it as the first hat accessory if feasible |
-| `public/assets/characters/woodland-spirits-sheet.jpg` | Sheet of 15 cute characters: mushroom friends, flower spirit, tiny dragon, owls, foxes, fairy rabbit, snail, hedgehogs, sprites, leaf creature, acorns, tree spirit | Crop into individual PNGs for decorative details and category variant touches (e.g. flower spirit → Beauty, acorn → Food). Never avatars |
-| `public/assets/creatures/woodland creature animations.jpg` | Flat cartoon sticker sheet: owl, rabbit, hedgehog, bear, deer, bird, raccoon, squirrel, fox + trees, leaves, mushrooms (still drawings — "animations" is just the file name) | Crop animals into `creatures/cutouts/*-flat.png` for ambient decoration (§9.15) |
+| `public/assets/characters/woodland-spirits-sheet.jpg` | Sheet of 15 cute characters: mushroom friends, flower spirit, tiny dragon, owls, foxes, fairy rabbit, snail, hedgehogs, sprites, leaf creature, acorns, tree spirit | **Not used anywhere** (removed from the app). Kept only as a supplied source file |
+| `public/assets/creatures/woodland creature animations.jpg` | Flat cartoon sticker sheet: owl, rabbit, hedgehog, bear, deer, bird, raccoon, squirrel, fox + trees, leaves, mushrooms (still drawings — "animations" is just the file name) | Crop animals into `creatures/cutouts/*-flat.png` (§9.15) and four autumn leaves into `foliage/leaf-*.png` for `LeafyBackground` |
 | `public/assets/creatures/more woodland creature animations.jpg` | Soft cartoon sticker sheet: wolf, rabbit, owl, woodpecker, raccoon, hedgehog, fox, deer, bear, squirrel, moose | Crop into `creatures/cutouts/*-soft.png` for ambient decoration (§9.15) |
 | `public/assets/fonts/Bloom Spring.otf` | Display font by Keithzo | `--font-display` (§9.3) |
 | `design/reference/moods/*` | Painted forest scenes: sunlit paths, light rays, mushrooms, wildflowers, hollow-tree door | **Mood only** (§9.16). Never placed, cropped, traced or shipped |
@@ -579,7 +579,7 @@ Starting inventory (from the images supplied with this spec):
 
 **Missing assets — approximate faithfully and keep swappable:**
 - **Hats:** only the hedgehog's beanie exists. Add 3–4 simple hats drawn in the same flat storybook style as SVG (`hat-*.svg`), clearly marked `// PLACEHOLDER-ART` so real art can replace them.
-- **Category decorations** (camera, books, sign, package, flowers…): small SVG overlays in the same style, or cropped characters from the spirits sheet.
+- **Category decorations** (camera, books, sign, package, flowers…): small SVG overlays in the same style. (The woodland spirits are not used.)
 - **Creatures:** only the animals on the two supplied sheets. Never invent new characters.
 - **Separate door / foliage layers** for the entrance: hand-cut from `treehouse-main.jpg` (door crop, foreground leaf crop) — don't redraw the scene.
 
@@ -588,11 +588,11 @@ Starting inventory (from the images supplied with this spec):
 ### 9.14 Design acceptance
 
 **Homepage** — main treehouse image used, framed close with less sky; door-opening + enter-the-treehouse animation; marketplace and business-signup clearly reachable.
-**Signup/login** — university picker; selection re-themes the page; UW uses purple/gold accents; woodland branding consistent; no impersonation of an official university page.
-**Account creation** — Personal and Business distinct and selectable; correct onboarding after selection; Carmel background; default avatar matches the supplied hedgehog; optional hats/sunglasses; skippable and editable later.
+**Signup/login** — calm Almond background with texture and a few leaves; whole vine visible on phone and desktop; no characters; no school pill — university shown only via accent colors and the picker; UW uses purple/gold accents; no impersonation of an official university page.
+**Account creation** — Personal and Business distinct and selectable; correct onboarding after selection; Carmel textured background; default avatar matches the supplied hedgehog; optional hats/sunglasses; skippable and editable later.
 **Business** — all 8 categories; restrained variant each; "Other" = default; preview updates live.
 **Marketplace** — Almond background; vines/foliage at top with subtle motion; themed search and filters; listings keep a treehouse identity; door entrance reused only for the right navigation.
-**Global** — Bloom Spring for display, National Park for body; no eyebrow text anywhere; every avatar is the hedgehog; creatures still, small and never over controls (≤2 on screen); mood references not shipped; supplied assets used (no unrelated replacements); consistent identity across pages; smooth, non-blocking animation; works on phone and desktop; reduced motion respected; text, forms and controls accessible.
+**Global** — Bloom Spring for big headings only, National Park for all other text (verified loading on every page); no eyebrow text anywhere; every avatar is the hedgehog; creatures still, small, sitting openly and grounded — never peeking, perching or half-hidden (≤2 on screen); no woodland spirits/sprites; mood references not shipped; supplied assets used (no unrelated replacements); consistent identity across pages; smooth, non-blocking animation; works on phone and desktop; reduced motion respected; text, forms and controls accessible.
 
 **Scope boundary:** this section is visual and frontend interaction. Don't rewrite backend, auth, database or API design to achieve it. Doors, account-type selection, university theming, avatar accessories and treehouse previews must actually work — not static mockups.
 
@@ -602,19 +602,19 @@ Starting inventory (from the images supplied with this spec):
 Small creatures sprinkled through the app for a cute, warm, homey feel. They are **still cartoon drawings: no movement, no idle animation, no entrance effects.**
 
 - **Source:** only the animals cut from the two sheets in `public/assets/creatures/` (`creatures/cutouts/*.png`). No invented characters. The hedgehogs on those sheets are not used — the hedgehog is reserved for user avatars (§9.9).
+- **Placement rule:** a creature never peeks, perches, lurks behind things or stares at the user from an edge — that feels creepy. When one appears it **sits openly, clearly visible, small, friendly and grounded**: sitting on a little patch of grass (built into `<Creature>`), in a bottom corner or next to a message. Never half-hidden, never cut off by an edge or another element.
 - **Placements** (`lib/creatures.ts` → `CREATURE_FOR`):
-  - Marketplace: a squirrel peeking out from behind the vines (`VineBorder peeker`).
-  - Empty states: a rabbit greeting you (`EmptyState`).
-  - Loading screens: an eyes-closed deer dozing (`LoadingState`, `app/loading.tsx`).
-  - Photo check passed: a fox beside the result (Phase 8).
-  - Signup / login: an owl perched on the top edge of the sign-in card.
+  - Empty states: a rabbit sitting above the message (`EmptyState`).
+  - Loading screens: an eyes-closed deer resting on the grass (`LoadingState`, `app/loading.tsx`).
+  - Photo check passed: a fox sitting beside the success message (Phase 8).
+  - Not on signup/login or the marketplace vines.
 - **Restraint:** small and occasional — **at most 1–2 visible at once**; never covering buttons, text or forms; decorative only (`alt=""`, `aria-hidden`, not interactive).
 - **Reduced motion:** they don't move, so nothing changes — they stay visible.
 - Every file and where it's used is listed in `public/assets/INVENTORY.md`; every source file is in `CREDITS.md`.
 
 ### 9.16 Mood references (`design/reference/moods/`)
 
-Painted forest scenes for vibe only: **sunlit forest, soft light rays, winding dirt paths, red-and-white mushrooms, wildflowers, hollow-tree doors — cozy and warm.** Use them to guide colors, lighting, textures, decorative details and how the illustrated parts of the UI feel (e.g. warm golden light, soft dappled highlights, earthy path tones, small mushroom and wildflower accents). **Never place, crop, trace or ship these images**, and never import them from app code.
+Painted forest scenes for vibe only: **sunlit forest, soft light rays, winding dirt paths, red-and-white mushrooms, wildflowers, hollow-tree doors — cozy and warm.** Use them to guide colors, lighting, textures, decorative details and how the illustrated parts of the UI feel (e.g. warm earthy tones, soft paper texture, scattered leaves). Backgrounds stay calm — never a busy scene. **Never place, crop, trace or ship these images**, and never import them from app code.
 
 ---
 

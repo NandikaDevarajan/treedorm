@@ -135,11 +135,6 @@ function keepLargestComponent(raw: Raw): void {
   filterComponents(raw, (_, isLargest) => isLargest);
 }
 
-/** Drops slivers of neighbouring sprites that leak in at a grid cell's left/right edges. */
-function dropSideSlivers(raw: Raw): void {
-  filterComponents(raw, (b, isLargest) => isLargest || !b.touchesSide);
-}
-
 async function writePng(raw: Raw, out: string, padding = 4): Promise<void> {
   await mkdir(path.dirname(out), { recursive: true });
   const img = sharp(raw.data, { raw: { width: raw.width, height: raw.height, channels: 4 } });
@@ -179,36 +174,6 @@ async function hedgehog() {
     .png({ compressionLevel: 9, palette: true })
     .toFile(src("characters/hedgehog-email.png"));
   console.log("  ✓ public/assets/characters/hedgehog-email.png");
-}
-
-const SPIRITS: string[][] = [
-  ["mushroom-friends", "flower-spirit", "tiny-dragon", "enchanted-owl", "magical-fox-violet"],
-  ["magical-fox", "fairy-rabbit", "glowing-snail", "fantasy-hedgehog", "woodland-sprite-hedgehog"],
-  ["woodland-sprite", "leaf-creature", "acorn-friend-01", "acorn-friend-02", "tree-spirit"],
-];
-// Vertical bands per row that contain the character but not its caption.
-const SPIRIT_ROWS = [
-  { top: 18, height: 102 },
-  { top: 142, height: 106 },
-  { top: 268, height: 104 },
-];
-
-async function spirits() {
-  console.log("woodland spirits");
-  const cellW = 740 / 5;
-  for (const [r, names] of SPIRITS.entries()) {
-    for (const [c, name] of names.entries()) {
-      const raw = await loadRaw(src("characters/woodland-spirits-sheet.jpg"), {
-        left: Math.round(c * cellW),
-        top: SPIRIT_ROWS[r].top,
-        width: Math.round(cellW) - 1,
-        height: SPIRIT_ROWS[r].height,
-      });
-      removeBackground(raw, [255, 255, 255], 16);
-      dropSideSlivers(raw);
-      await writePng(raw, src(`characters/spirits/${name}.png`));
-    }
-  }
 }
 
 async function sunglasses() {
@@ -300,6 +265,24 @@ async function creatures() {
   }
 }
 
+// Loose autumn leaves from the flat creature sheet, scattered over the calm page backgrounds.
+const LEAVES: Record<string, Box> = {
+  "leaf-maple-orange": { left: 121, top: 111, width: 46, height: 52 },
+  "leaf-maple-red": { left: 155, top: 157, width: 50, height: 44 },
+  "leaf-yellow": { left: 13, top: 227, width: 38, height: 51 },
+  "leaf-oak": { left: 429, top: 277, width: 42, height: 63 },
+};
+
+async function leaves() {
+  console.log("scattered leaves");
+  for (const [name, box] of Object.entries(LEAVES)) {
+    const raw = await loadRaw(src("creatures/woodland creature animations.jpg"), box);
+    removeBackground(raw, [255, 255, 255], 18);
+    keepLargestComponent(raw);
+    await writePng(raw, src(`foliage/${name}.png`), 2);
+  }
+}
+
 /** PWA + favicon icons, cropped square around the cabin in treehouse-main. */
 async function icons() {
   console.log("app icons");
@@ -331,10 +314,10 @@ async function icons() {
 async function main() {
   await icons();
   await hedgehog();
-  await spirits();
   await sunglasses();
   await treehouse();
   await creatures();
+  await leaves();
 }
 
 main().catch((err) => {

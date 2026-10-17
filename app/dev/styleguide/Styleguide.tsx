@@ -9,9 +9,9 @@ import { CreamCard } from "@/components/woodland/CreamCard";
 import { Creature } from "@/components/woodland/Creature";
 import { EmptyState } from "@/components/woodland/EmptyState";
 import { LeafChip } from "@/components/woodland/LeafChip";
+import { LeafyBackground } from "@/components/woodland/LeafyBackground";
 import { LoadingState } from "@/components/woodland/LoadingState";
 import { SearchField } from "@/components/woodland/SearchField";
-import { SunRays } from "@/components/woodland/SunRays";
 import { VineBorder } from "@/components/woodland/VineBorder";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { CREATURES, CREATURE_FOR } from "@/lib/creatures";
@@ -28,22 +28,6 @@ const COLORS = [
 ] as const;
 
 const CATEGORIES = ["Hair", "Nails", "Photos", "Baked goods", "Tutoring", "Fitness"];
-
-// Decorative spirits for category treehouse variants (Phase 4) — never avatars or ambient creatures.
-const SPIRITS = [
-  "mushroom-friends",
-  "flower-spirit",
-  "tiny-dragon",
-  "enchanted-owl",
-  "magical-fox",
-  "glowing-snail",
-  "fantasy-hedgehog",
-  "woodland-sprite",
-  "leaf-creature",
-  "acorn-friend-01",
-  "acorn-friend-02",
-  "tree-spirit",
-] as const;
 
 const HATS = ["acorn-cap", "flower-crown", "straw-sunhat", "wizard"];
 
@@ -64,8 +48,8 @@ export function Styleguide() {
 
   return (
     <div className="min-h-dvh pb-28">
-      <VineBorder dense peeker />
-      <main className="mx-auto -mt-6 flex max-w-3xl flex-col gap-12 px-safe">
+      <VineBorder dense />
+      <main className="mx-auto flex max-w-3xl flex-col gap-12 px-safe">
         <header className="flex flex-col gap-2">
           <h1 className="font-display text-5xl text-bark">Tree Dorm styleguide</h1>
           <p className="max-w-prose text-walnut/80">
@@ -93,7 +77,8 @@ export function Styleguide() {
               <p className="font-display text-5xl leading-none text-bark">Golden Hour Grads</p>
               <p className="font-display text-3xl text-bark">Sweet Dorm Bakes</p>
               <p className="text-sm text-walnut/75">
-                Bloom Spring (--font-display): titles, short headings, treehouse names, decorative labels.
+                Bloom Spring (--font-display): big headings only — page titles, section headings, treehouse
+                names.
               </p>
             </div>
             <div className="flex flex-col gap-2 border-t border-bark/15 pt-4">
@@ -179,44 +164,34 @@ export function Styleguide() {
           </CreamCard>
         </Section>
 
-        <Section title="Light">
-          <div className="relative h-40 overflow-hidden rounded-card bg-leaf">
-            <SunRays />
-            <p className="absolute bottom-3 left-4 rounded-full bg-cream px-3 py-1 text-sm font-semibold">
-              SunRays: still, warm canopy light from the mood references
-            </p>
+        <Section title="Backgrounds">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["almond", "carmel"] as const).map((tone) => (
+              <div key={tone} className="h-44 overflow-hidden rounded-card border border-bark/15">
+                <LeafyBackground tone={tone} className="min-h-0 h-full">
+                  <p className="m-4 w-fit rounded-xl bg-cream px-3 py-2 text-sm">
+                    <strong className="capitalize">{tone}</strong>, soft texture, a few still leaves
+                  </p>
+                </LeafyBackground>
+              </div>
+            ))}
           </div>
         </Section>
 
         <Section title="Woodland creatures">
           <p className="max-w-prose text-walnut/85">
-            Still drawings, never animated, never an avatar. In the app at most one or two show at a time, and
-            never over buttons, text or forms. This page shows them all at once only as a catalogue.
+            Still drawings, never animated, never an avatar. Each one sits openly on a little patch of grass:
+            small, friendly and fully visible — never peeking, perching or half-hidden. In the app at most one
+            or two show at a time; this page shows them all only as a catalogue.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
-            <CreamCard className="flex flex-col gap-2 overflow-hidden p-0">
-              <VineBorder peeker className="bg-almond" />
-              <p className="px-5 pb-4 text-sm">
-                <strong>Marketplace vines</strong> — {CREATURE_FOR.vinePeek} peeks out from behind the leaves.
-              </p>
-            </CreamCard>
-            <CreamCard className="flex flex-col gap-2">
-              <div className="relative mt-14 rounded-2xl border border-bark/15 bg-almond/60 p-4">
-                <Creature name={CREATURE_FOR.authCard} size={60} className="absolute -top-[53px] right-4" />
-                <p className="font-display text-2xl text-bark">Welcome back</p>
-                <p className="text-sm text-walnut/80">Sign-in card</p>
-              </div>
-              <p className="text-sm">
-                <strong>Sign-in card</strong> — {CREATURE_FOR.authCard} perches on the top edge.
-              </p>
-            </CreamCard>
             <CreamCard className="p-0">
               <EmptyState title="Nothing here yet">
-                Empty states — {CREATURE_FOR.emptyState} says hello.
+                Empty states — {CREATURE_FOR.emptyState} sits above the message.
               </EmptyState>
             </CreamCard>
             <CreamCard className="p-0">
-              <LoadingState label={`Loading screens — ${CREATURE_FOR.loading} dozes.`} />
+              <LoadingState label={`Loading screens — ${CREATURE_FOR.loading} rests.`} />
             </CreamCard>
             <CreamCard className="flex items-center gap-4 sm:col-span-2">
               <Creature name={CREATURE_FOR.checkPassed} size={88} />
@@ -264,24 +239,6 @@ export function Styleguide() {
                 />
                 <figcaption className="text-sm">door.png</figcaption>
               </figure>
-            </div>
-
-            <div>
-              <h3 className="mb-2 font-bold">Woodland spirits (category decorations, Phase 4)</h3>
-              <ul className="grid grid-cols-4 gap-3 sm:grid-cols-6">
-                {SPIRITS.map((s) => (
-                  <li key={s} className="flex flex-col items-center gap-1 text-center text-xs">
-                    <Image
-                      src={`/assets/characters/spirits/${s}.png`}
-                      alt=""
-                      width={64}
-                      height={64}
-                      className="h-16 w-auto max-w-full object-contain"
-                    />
-                    {s}
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <div>

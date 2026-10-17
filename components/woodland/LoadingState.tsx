@@ -2,7 +2,7 @@ import { Creature } from "@/components/woodland/Creature";
 import { cn } from "@/lib/cn";
 import { CREATURE_FOR } from "@/lib/creatures";
 
-/** Full-area loading screen: the eyes-closed deer dozing while the page arrives. Static. */
+/** Full-area loading screen: the eyes-closed deer resting on the grass while the page arrives. Static. */
 export function LoadingState({ label = "Loading…", className }: { label?: string; className?: string }) {
   return (
     <div
@@ -11,7 +11,7 @@ export function LoadingState({ label = "Loading…", className }: { label?: stri
     >
       <div className="relative">
         <Creature name={CREATURE_FOR.loading} size={120} />
-        <span aria-hidden className="absolute -top-2 -right-5 font-display text-2xl text-bark/60">
+        <span aria-hidden className="absolute top-0 -right-4 text-xl font-bold text-bark/60">
           z<span className="text-lg">z</span>
         </span>
       </div>
