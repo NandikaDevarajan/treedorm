@@ -1,0 +1,518 @@
+DESIGN SPECIFICATION: WOODLAND TREEHOUSE MARKETPLACE
+1. Overall Design Direction
+Design a whimsical, cozy, woodland-fantasy marketplace where each small business has its own personalized treehouse and users explore the marketplace by entering a magical forest world.
+The website should feel like an illustrated storybook brought to life, combining hand-drawn woodland scenery, warm natural colors, playful animations, and cute fantasy characters. The treehouses should feel like actual little spaces that users can enter, not simply decorative images placed behind a conventional ecommerce interface.
+Core aesthetic keywords
+Cozy woodland fantasy
+Storybook illustration
+Warm, earthy, natural
+Whimsical but polished
+Soft, organic shapes
+Handmade, creative, community-oriented
+Subtle animation and interactive details
+The website should feel visually cohesive across all pages. Avoid generic SaaS dashboards, overly minimalist layouts, corporate gradients, neon colors, and standard ecommerce templates.
+Asset-first design approach
+A folder of reference images will be provided with this specification. Treat those images as the primary source of truth for the visual direction.
+Before designing:
+Inspect all images in the provided folder.
+Identify the intended homepage treehouse image, especially the asset named “another treehouse image.”
+Identify the woodland spirit/fantasy hedgehog images, particularly the images in the “animated hedgehog” collection.
+Identify the available hats, sunglasses, and other avatar accessories.
+Identify existing illustrations, treehouse variations, foliage, backgrounds, and other decorative elements.
+Reuse the supplied assets wherever possible rather than generating unrelated replacements.
+Do not assume every image is intended to be a standalone page background. Some assets may need to be layered, cropped, masked, animated, or positioned relative to one another.
+Preserve the original illustrations' style, proportions, colors, and character designs. Do not stretch images or replace illustrated elements with unrelated stock imagery.
+If an exact asset or font is unavailable, implement the closest faithful approximation and keep the relevant element easy to replace later.
+
+2. Design System: Colors, Typography, and Visual Language
+Color palette
+Use a warm, earthy palette inspired by tree bark, wooden cabins, leaves, sunlight, and parchment.
+Color
+Hex
+Intended use
+Almond
+#EADDCA
+Main background for the search/filter page
+Carmel
+#C19A6B
+Creating-account page background and warm accent surfaces
+Tree Bark Brown
+#6B4226
+Proposed primary brown for treehouses, doors, and wood details
+Dark Walnut
+#3E2B20
+Dark text, outlines, and strong contrast
+Leaf Green
+#64764B
+Foliage, vines, and nature-inspired accents
+Sage
+#A8B58A
+Secondary green surfaces and soft decorative details
+Cream
+#FFF8EC
+Form fields, cards, and light surfaces
+Warm Gold
+#D9B56D
+Small highlights, magical details, and hover accents
+
+The tree bark brown is a proposed starting point because the exact brown hex value has not been specified. Adjust it to match the supplied treehouse illustrations.
+Use the colors in a restrained way. Almond and cream should provide breathing room, while the browns anchor the design. Greens should mostly appear in foliage and decorative details.
+Do not make every page uniformly brown. Each page should have its own background treatment while still belonging to the same visual world.
+Typography
+Primary decorative font: Bloom Spring Regular
+Reference: https://www.1001fonts.com/cartoon+cursive+cute-fonts.html
+Use Bloom Spring Regular for:
+Main page titles
+Short whimsical headings
+Treehouse names
+Occasional decorative labels
+Verify the exact font file and license before embedding it. If it cannot be retrieved from the provided reference, use a similar rounded, playful display font temporarily.
+Use a separate, highly readable rounded sans-serif font for:
+Body text
+Form labels and inputs
+Navigation
+Search and filter controls
+Account information
+Buttons and validation messages
+Do not use the decorative font for long paragraphs or small form labels. The site should remain easy to read and usable.
+Shapes and component styling
+Prefer softly rounded corners over sharp rectangular cards.
+Use organic, irregular silhouettes for illustrated elements when appropriate.
+Buttons should feel tactile, like little wooden signs, illustrated labels, or rounded storybook controls.
+Use subtle borders, gentle shadows, and layered illustrations to create depth.
+Avoid excessive glassmorphism, glossy gradients, or heavy drop shadows.
+Keep text readable against illustrated backgrounds by placing it on cream or translucent light surfaces where necessary.
+
+3. Global Animation and Interaction Principles
+Animation is one of the defining features of the website. It should make the user feel as though they are entering and exploring a woodland world.
+However, animations must not make the website slow, disorienting, or difficult to navigate.
+General rules
+Use smooth, purposeful transitions rather than constant movement everywhere.
+Favor gentle easing, organic movement, and a sense of physical depth.
+Keep important buttons and form controls responsive during transitions.
+Avoid replaying the full entrance animation every time a user returns to a page or changes a filter.
+On mobile, simplify complex animations when necessary.
+Respect the operating system's reduced-motion preference and provide a reduced-animation experience.
+Use CSS transforms, opacity transitions, and lightweight animation techniques wherever possible.
+Do not use a large video or expensive 3D scene when the same visual effect can be achieved with layered illustrations.
+Main treehouse entrance animation
+The entrance animation should be the website's signature interaction.
+The intended experience is that the user approaches a treehouse, sees its door, and is visually transported inside to access the website.
+This should feel like entering an illustrated world rather than navigating between ordinary web pages.
+The same visual language should be reused when moving from the homepage into the marketplace.
+
+4. Homepage: Main Treehouse Entrance
+Visual composition
+The homepage should feature a close-up view of the treehouse as its main focal point.
+Use the “another treehouse image” from the provided image folder as the primary visual reference for the opening animation.
+The scene should resemble the supplied front-page reference, but with the camera framed closer to the treehouse.
+Specific composition requirements:
+The treehouse should dominate the scene.
+Show enough of the tree trunk to establish that the house is built into a tree.
+Include visible branches and leafy foliage around the edges and top.
+Show significantly less sky than in the wider reference image.
+Do not attempt to fit the entire tree into the frame.
+Keep the treehouse entrance and door clearly visible.
+Preserve the original illustration's colors, textures, and proportions.
+The goal is a close, inviting view of a treehouse nestled in a tree canopy, not a distant landscape illustration.
+Homepage content
+The homepage is also the entry point for business owners.
+Include:
+A prominent, whimsical brand title or logo area.
+A concise introductory message explaining the marketplace.
+A primary call to action for exploring the marketplace.
+A secondary call to action for business owners who want to create a listing or storefront.
+Clear access to login and signup.
+Keep the text minimal so the illustration remains the main attraction. Place text in a composition that does not obscure the door, treehouse, or other important visual details.
+The business-owner entry point should lead to the appropriate account creation or onboarding flow. It should not be confused with the marketplace entrance.
+Entrance animation: step-by-step
+Implement the following sequence:
+Initial scene: Show the close-up treehouse illustration. The scene is fully composed, with the door visible and foliage framing the edges.
+Subtle idle movement: Add gentle movement to selected leaves, small branches, or other suitable elements. Keep it restrained.
+User interaction: When the user clicks the primary entrance button or the intended interactive door, begin the transition.
+Door opening: Animate the door opening inward if the supplied artwork supports it. Otherwise, create a convincing approximation using separate layers, a door overlay, or a carefully timed visual transition.
+Entering the treehouse: Simulate the camera moving toward and through the doorway. Scale and reposition the scene to create a feeling of forward motion.
+Interior transition: Use a short darkening, warm glow, or layered transition to bridge the outside scene and the destination.
+Destination: Reveal the intended marketplace or next page with a smooth fade or zoom.
+The transition should feel continuous, as though the user moves through the door into another space.
+Do not simply enlarge the entire image until it becomes blurry and call that the animation. Use layers and carefully controlled cropping where the provided artwork allows it.
+If the treehouse image is a single flattened image, create the best approximation possible without inventing an entirely different illustration.
+Implementation considerations
+Inspect whether the source artwork can be separated into:
+Background foliage and sky
+Tree trunk
+Treehouse structure
+Door
+Foreground branches or leaves
+If the assets are flattened, use CSS transforms, clipping, scaling, and layered overlays to approximate the desired effect.
+Keep the entrance animation reusable so it can be triggered when entering the marketplace from other pages.
+
+5. Individual Business Treehouses
+Each business should have its own treehouse identity rather than appearing as a generic listing card.
+The base visual style should remain consistent, but individual treehouses can differ in their decorative details, category-specific objects, lighting, and subtle animations.
+Base treehouse design
+Every treehouse should feel like part of the same woodland village.
+Shared elements:
+Consistent illustrated wood and foliage style
+Similar overall scale and proportions
+A recognizable doorway or entrance
+Consistent outline and shading treatment
+Shared natural color palette
+Small opportunities for individualized decorations
+Individualization should not make some businesses feel as if they belong to an entirely different website.
+Treehouse animations
+Finalize the animation direction around small, personality-driven interactions rather than large cinematic animations for every listing.
+Use these as the intended animation concepts:
+Idle state: A subtle leaf sway, gentle light movement, or a small environmental detail.
+Hover state: The treehouse lifts or grows slightly, the foliage moves, or the doorway becomes more inviting.
+Click state: The treehouse transitions toward an open-door or zoom-in state, leading to the business's storefront.
+Reduced-motion state: Use a simple highlight or color change instead of spatial movement.
+Animations should be staggered and restrained when multiple treehouses are visible simultaneously. Avoid having every treehouse independently bouncing or moving constantly.
+If the supplied assets allow separate doors or foliage layers, use those for more convincing interactions. Otherwise, use lightweight transforms and opacity changes.
+The design should make the user curious about entering different businesses.
+
+6. Signup and Login Pages
+General visual direction
+The signup and login pages should feel like the account-access area of the woodland marketplace, while introducing a university-specific visual theme.
+The university theme should change the page's colors, accents, and decorative details without replacing the core brand identity.
+University selection
+During signup, the user must provide their college or university.
+Use a clear university selection field with search or autocomplete if feasible.
+Once the user selects a university:
+Identify the university's established brand colors.
+Apply those colors to the signup page's accents, buttons, borders, and decorative details.
+Preserve the woodland aesthetic, including warm backgrounds, rounded components, and illustrated elements.
+Clearly label the page as the signup page for the selected university.
+Keep the university branding visually distinct from the main marketplace branding.
+Example: University of Washington
+For a University of Washington signup page:
+Use UW purple and gold as the university-specific accent colors.
+Include a visible label identifying the page as the UW signup page.
+Use those colors on buttons, accent borders, selected states, and small decorative details.
+Retain the site's woodland illustrations and general design language.
+The page should feel like the woodland marketplace has a UW-themed edition, not like a generic UW website with the treehouse logo pasted onto it.
+Other universities
+When users select another university, adapt the design using that institution's known colors.
+Create a reusable university-theme configuration rather than hardcoding a separate page for every college.
+For each university, allow the design to specify:
+Primary university color
+Secondary university color
+Optional background or accent color
+University display name
+Optional university logo, only when an appropriate asset is available and its use is permitted
+If the university is unknown or its colors cannot be reliably identified, use the default woodland theme rather than guessing.
+University-themed pages should be inspired by university branding, not impersonate official university authentication portals. Do not copy an official login screen or imply that the marketplace is operated by the university.
+Login page
+The login page should follow the same visual theme as the corresponding signup page.
+Include:
+University selection or a clear indication of the user's existing university context
+Email or appropriate login identifier
+Password field
+Login button
+Link to create an account
+Password recovery link, if supported by the application
+Maintain clear, readable form fields and sufficient contrast. The university colors should enhance the design, not compromise usability.
+
+7. Account Creation and Profile Customization
+There are two account types: Personal and Business.
+The account creation page should make this distinction immediately clear.
+Page layout
+Use the Carmel color #C19A6B as the main background color for the account creation page.
+Use cream-colored cards or panels for the form itself, with dark brown text and natural green accents.
+The two account types should appear as distinct, selectable options.
+Personal account
+Use a cute, character-centered illustration or avatar preview.
+Emphasize browsing, discovering businesses, and personalizing the user's character.
+Business account
+Use a treehouse-centered illustration or storefront preview.
+Emphasize creating a business identity and customizing the business's treehouse.
+The selected option should have a clear visual state, such as a border, slight elevation, or color change. Make it obvious which account type the user selected.
+After selection, show the relevant onboarding survey and fields.
+Personal account onboarding
+Allow users to complete the appropriate account survey and personalize their profile.
+The avatar customization is optional. Users should be able to skip it and finish creating their account.
+The default character is the hedgehog from the provided woodland spirit/fantasy hedgehog assets.
+Use the “animated hedgehog” collection as the reference for the standard character, paying particular attention to the main hedgehog illustration when determining its default appearance.
+Preserve its original:
+Facial features
+Body proportions
+Colors
+Illustration style
+Overall personality and expression
+Do not replace the character with a generic emoji, unrelated cartoon hedgehog, or a newly generated character that does not match the reference.
+Hedgehog avatar customization
+Provide an interactive avatar preview and a collection of selectable accessories from the provided image folder.
+The initial accessories include:
+Different hats
+Different sunglasses
+Use the actual provided accessory images whenever possible.
+The customization interface should let the user:
+View the default hedgehog.
+Browse available hats and sunglasses.
+Select or deselect an accessory.
+Preview the selected accessory on the hedgehog.
+Change selections before saving.
+Skip customization entirely.
+Finish the process with either the default character or a customized character.
+Accessories should be visually aligned with the hedgehog's head and face. Do not simply place them arbitrarily over the image.
+If the assets have transparent backgrounds, use those to layer accessories over the character. If the source images require cropping or alignment adjustments, preserve their artwork while fitting them to the avatar.
+Allow one hat and one pair of sunglasses at a time unless the supplied design assets suggest otherwise.
+The saved avatar should be displayed consistently across the user's profile and other relevant parts of the website.
+Important: Avatar customization must also be accessible after account creation through a profile-editing interface. It is not a one-time decision.
+
+8. Business Account Onboarding and Treehouse Personalization
+Business owners should be able to create a business profile and personalize their treehouse according to their business category.
+Business onboarding flow
+The visual flow should be:
+Select Business as the account type.
+Complete the business information survey.
+Choose a business category.
+Preview the category-specific treehouse.
+Complete any remaining profile details.
+Confirm and save the business profile.
+The treehouse preview should update when the user selects a category, allowing them to see how their business will be represented.
+Business categories
+Support the following categories:
+Beauty
+Food
+Fitness
+Photography
+Tutoring
+Crafts
+Reselling
+Other
+Category-specific treehouse designs
+Each category should use the same base treehouse illustration and introduce subtle, relevant visual differences.
+The following are suggested design directions to guide the implementation. Use the provided assets wherever possible.
+Category
+Suggested visual customization
+Beauty
+Floral accents, soft decorative leaves, or gentle pastel details
+Food
+Small fruit, herb, or food-inspired decorative elements
+Fitness
+Energetic foliage or a small fitness-inspired sign
+Photography
+A tiny camera detail or photography-themed sign
+Tutoring
+Books, a pencil, or a small learning-inspired detail
+Crafts
+Handmade decorations, colorful details, or craft-inspired objects
+Reselling
+A small market sign, package, or shop-inspired decoration
+Other
+The default, unmodified treehouse
+
+Keep these differences small enough that the treehouses still look like members of the same family.
+Do not invent elaborate accessories or completely different building structures if the provided image assets do not support them. If no relevant decorative asset exists, use a subtle color variation, small sign, or existing illustration detail.
+Treehouse preview and selection
+Display the treehouse prominently in the onboarding interface.
+Update the preview when the business category changes.
+Keep the default treehouse as the fallback for “Other.”
+Make the category-specific details reusable so new categories can be added later.
+Preserve the selected design when the user edits their business profile.
+The customization should be visually meaningful but not burdensome. Business owners should not need to configure many individual decorative settings just to create an account.
+
+9. Search and Filter Marketplace Page
+The search/filter page should feel like the user has successfully entered the woodland village.
+Its visual identity should differ from the homepage, while continuing the same illustrated style.
+Background and color
+Use Almond #EADDCA as the main page background.
+The overall page should feel like a warm, softly lit woodland interior or a parchment-like marketplace setting.
+Use:
+Almond as the main background
+Cream for cards, search fields, and filter panels
+Tree Bark Brown for headings and important controls
+Leaf Green and Sage for nature-inspired accents
+Warm Gold for subtle interactive highlights
+Avoid a plain white ecommerce layout or a dark, crowded dashboard.
+Top decorative border
+Add decorative vines and foliage along the top of the page.
+The vines should frame the page rather than obstruct its contents.
+Requirements:
+Position vines along the top edge, with organic curves and leaves.
+Reuse the foliage assets provided in the image folder where suitable.
+Keep the main search interface visually clear beneath the decorations.
+Use gentle, subtle movement, such as a slight sway of leaves.
+Avoid making the entire decorative border continuously wave or distract the user.
+Ensure the decoration scales or simplifies appropriately on smaller screens.
+If the artwork supports it, allow a few vines to extend slightly down the upper corners to create the impression of entering a sheltered woodland space.
+Marketplace entrance animation
+When a user navigates from the homepage into the marketplace, reuse the same treehouse entrance animation described earlier.
+The intended sequence is:
+The user interacts with the treehouse door.
+The door opens.
+The camera moves into the treehouse.
+A short transition bridges the entrance and the marketplace.
+The search/filter interface appears.
+Do not replay this entrance animation every time the user changes a filter, opens a listing, or returns from a search result. Use it for the relevant navigation transition, not for ordinary interface interactions.
+If a user opens a direct marketplace URL or returns to an existing session, show the destination immediately or use a much shorter transition.
+Search bar
+The search bar should be prominent and visually integrated with the woodland aesthetic.
+Design direction:
+A wide, rounded search field with a cream background.
+A clear search icon.
+Readable placeholder text that encourages users to discover businesses.
+A visible focus state.
+A simple search or submit interaction.
+The search field must remain a functional interface element, not merely a decorative mockup.
+Filter controls
+Create visually distinct filters that complement the rounded, illustrated design.
+Possible filter presentation:
+Rounded category chips
+Compact dropdowns
+A collapsible filter panel
+Clearly highlighted selected filters
+Use the same business categories established during onboarding so that the marketplace and business profiles remain visually consistent.
+Selected filters should have a clear state, such as a green or brown fill with contrasting text.
+Keep the layout organized. Decorative foliage should never overlap search inputs, filters, listing names, or other essential controls.
+Business listing presentation
+Business results should feel like small destinations within a woodland village.
+Where appropriate, display:
+Business name
+Business category
+A small treehouse illustration or thumbnail
+A short business description
+A visible interaction to enter the business storefront
+Avoid presenting every result as an identical, generic rectangular ecommerce card.
+The treehouse should be a recognizable part of each listing's visual identity. Keep the underlying listing layout consistent enough that users can scan and compare businesses easily.
+The exact number of visible listings, pagination, and search behavior can follow the existing application architecture. This specification focuses on the visual presentation.
+Empty and loading states
+Design matching visual states for:
+Initial loading
+Search in progress
+No matching results
+No filters selected
+Filtered results
+Use simple woodland-themed illustrations or small decorative elements where useful, but avoid excessive animation that delays access to results.
+
+10. Page-to-Page Visual Consistency
+The website should feel like one continuous world, with each page representing a different part of that world.
+Page
+Primary visual identity
+Homepage
+Close-up treehouse illustration and cinematic entrance
+Signup/login
+University-specific accent colors combined with woodland styling
+Account creation
+Carmel background, cream form surfaces, and character/treehouse previews
+Personal profile customization
+Default woodland hedgehog and accessory selection
+Business onboarding
+Category-specific treehouse preview
+Marketplace search/filter
+Almond background, vines, foliage, and organized search controls
+Individual storefront
+Personalized treehouse identity and matching woodland details
+
+Reuse the same typography, button styles, border treatments, icon language, and animation principles throughout.
+Avoid designing every page independently. The visual details should be shared components or reusable design tokens wherever possible.
+
+11. Responsive Design
+The aesthetic must work across desktop, tablet, and mobile.
+Desktop
+Use a large, visually immersive treehouse scene on the homepage.
+Allow the search/filter page to breathe, with clear spacing between the decorative top border, search bar, filters, and results.
+Display the avatar preview beside its accessory controls when there is sufficient room.
+Mobile
+Keep the treehouse as the central focal point.
+Reframe or crop the illustration without stretching it.
+Make the entrance interaction easy to tap.
+Reduce decorative vines and foliage if they compete with content.
+Stack account-type cards and onboarding sections vertically.
+Keep the hedgehog preview visible while accessories are selected.
+Use compact, scrollable category chips or an accessible filter panel.
+All forms, buttons, and interactive elements must remain easy to use on small screens.
+
+12. Accessibility and Motion
+The website can be whimsical without sacrificing usability.
+Implement:
+Adequate text contrast against all backgrounds.
+Visible keyboard focus states.
+Keyboard-accessible interactive doors, buttons, and accessory choices.
+Descriptive accessible labels for images and controls where needed.
+Reduced-motion alternatives for the entrance animation and idle effects.
+Clear selected states for account types, university themes, and avatar accessories.
+Usable form fields and validation states.
+Decorative images should not be announced unnecessarily by screen readers. Essential interactive elements must remain accessible even if animations are disabled.
+
+13. Asset and Font Implementation Requirements
+The provided image folder is part of the design specification and must be inspected before implementation.
+Create a simple asset inventory that maps each relevant image to its intended role.
+For example:
+Main treehouse image → homepage entrance
+Hedgehog base image → default personal avatar
+Hat images → avatar accessory collection
+Sunglasses images → avatar accessory collection
+Foliage and vine images → marketplace decoration
+Additional treehouse images → business listing variations and category previews
+These mappings are illustrative; confirm the actual filenames and contents before using them.
+Asset handling rules
+Use the supplied images directly wherever possible.
+Preserve transparency in PNG or other suitable transparent assets.
+Maintain aspect ratios.
+Use appropriate image positioning and cropping.
+Avoid duplicate asset files when a single source can be reused.
+Keep assets organized and reference them through a consistent path structure.
+Do not invent filenames or assume images exist without inspecting the folder.
+For animations, use the original illustrations as layers whenever the available assets support that approach.
+If a desired interaction requires artwork that does not exist, implement a restrained approximation using the existing artwork and CSS rather than replacing the whole scene with an unrelated illustration.
+
+14. Final Design Acceptance Criteria
+The design implementation is ready for review when all of the following are true.
+Homepage
+The supplied “another treehouse image” is the primary visual reference.
+The composition is zoomed in, with less sky and a stronger focus on the treehouse.
+The entrance animation includes a door-opening and enter-the-treehouse effect.
+Users can clearly access the marketplace and business-owner signup.
+Signup and login
+The signup flow includes a university selection field.
+The selected university changes the visual theme appropriately.
+The UW version uses purple and gold accents.
+The default woodland branding remains consistent.
+The page does not impersonate an official university authentication page.
+Account creation
+Personal and Business are distinct selectable account types.
+The correct onboarding interface appears after selection.
+The Carmel color is used for the account-creation background.
+The default personal avatar matches the supplied woodland hedgehog.
+Users can optionally customize the avatar using supplied hats and sunglasses.
+Avatar customization can be skipped and revisited later.
+Business personalization
+All eight specified business categories are supported.
+Each category has an appropriate, restrained treehouse variation.
+“Other” uses the default treehouse.
+The treehouse preview updates with category selection.
+Search and filter
+The Almond background is used.
+The top of the page features woodland vines and foliage.
+Any movement in the foliage is subtle.
+Search and filter controls are visually integrated with the theme.
+Listings maintain a recognizable treehouse identity.
+The treehouse entrance animation is reused for the appropriate navigation transition.
+Global quality
+The provided assets are used instead of unrelated replacements.
+The visual identity is consistent across all pages.
+Animations are smooth and do not block normal interaction.
+The interface works on desktop and mobile.
+Reduced-motion preferences are respected.
+Text, forms, and interactive elements remain accessible.
+
+15. Instructions for Claude's Implementation Workflow
+Treat this document as the design source of truth for the visual layer of the application.
+Before making substantial changes:
+Inspect the existing project structure and the provided image folder.
+Identify the existing frontend framework, routing, and component structure.
+Map the reference assets to the relevant pages and interactions.
+Establish reusable color tokens, typography, buttons, form styles, and animation patterns.
+Implement the homepage treehouse scene and entrance animation first, since they establish the visual language for the rest of the site.
+Build the signup/login and account-creation interfaces using the shared design system.
+Implement the hedgehog avatar preview and category-specific treehouse previews using the actual assets.
+Build the marketplace search/filter presentation, including the decorative vine border.
+Test the visual experience across desktop and mobile and refine spacing, cropping, and transitions.
+Scope boundary: This is primarily a design and frontend interaction specification. Do not unnecessarily rewrite the backend, authentication system, database, or API architecture to achieve the visual requirements. Connect the interfaces to existing functionality where available, and use clearly identified mock data only when necessary to demonstrate the intended design.
+Do not stop at a static mockup if the project already supports interactions. The doors, account-type selection, university theme selection, avatar accessories, and treehouse previews should behave as described.
+The final result should feel like entering a little woodland world where every business has its own place and every user has a character of their own.
+ 
+
+
