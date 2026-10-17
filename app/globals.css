@@ -10,6 +10,10 @@
   --color-sage: var(--sage);
   --color-cream: var(--cream);
   --color-gold: var(--gold);
+  --color-danger: var(--danger);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-2: var(--accent-2);
 
   --font-display: var(--font-display-stack);
   --font-sans: var(--font-body-stack);
@@ -36,7 +40,7 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--bark);
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
     border-radius: 0.5rem;
   }

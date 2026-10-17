@@ -12,6 +12,14 @@
   --sage: #a8b58a;
   --cream: #fff8ec;
   --gold: #d9b56d;
+  /* Not in §9.2: validation errors need a readable red that still feels earthy (berry). */
+  --danger: #a23b2a;
+
+  /* Accent slots. Default woodland values; a university theme overrides them on a wrapper
+     (lib/schools.ts themeStyle) to recolour buttons, accent borders, selected states and focus rings. */
+  --accent: var(--bark);
+  --on-accent: var(--cream);
+  --accent-2: var(--gold);
 
   /* Fonts are loaded with next/font in app/layout.tsx, which sets the --font-*-face variables.
      SPEC-NOTE: Bloom Spring's license isn't confirmed, so Sniglet (OFL, Google Fonts) stands in.

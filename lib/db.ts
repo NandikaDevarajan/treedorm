@@ -18,3 +18,10 @@ export async function getDb(): Promise<Db> {
   const client = await globalForMongo._mongoClient;
   return client.db(process.env.MONGODB_DB || "treedorm");
 }
+
+/** Closes the shared client (scripts only — the app keeps its connection open). */
+export async function closeDb(): Promise<void> {
+  const client = await globalForMongo._mongoClient;
+  globalForMongo._mongoClient = undefined;
+  await client?.close();
+}
