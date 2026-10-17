@@ -13,7 +13,7 @@ const LEAVES = [
     src: "leaf-maple-orange",
     size: 34,
     rotate: -18,
-    className: "hidden sm:block top-[18%] right-[12%]",
+    className: "hidden sm:block top-[16%] right-[2.5%]",
   },
   {
     src: "leaf-yellow",

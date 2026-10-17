@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { inputClass, textareaClass } from "@/components/seller/field";
 import { TagEditor } from "@/components/seller/TagEditor";
-import { AITag } from "@/components/woodland/AITag";
 import { LeafChip } from "@/components/woodland/LeafChip";
 import { TreehousePreview } from "@/components/woodland/TreehousePreview";
 import { WoodButton } from "@/components/woodland/WoodButton";
@@ -36,7 +35,7 @@ type Draft = { tagline: string; bio: string; tags: string[]; ai: boolean };
  * Business survey (SPEC §3.1 step 4, §9.8): one question per screen, with the category treehouse
  * preview always visible and updating live; then the Gemini draft to review and edit.
  */
-export function BusinessSurvey() {
+export function BusinessSurvey({ cancelHref }: { cancelHref?: string }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -280,25 +279,16 @@ export function BusinessSurvey() {
       title: "Here's your treehouse sign",
       body:
         busy && !draft ? (
-          <div role="status" aria-label="Writing your shop" className="flex flex-col gap-4">
-            <p className="text-walnut/85">Writing your tagline and bio…</p>
+          <div role="status" aria-label="Setting up your treehouse sign" className="flex flex-col gap-4">
+            <p className="text-walnut/85">Setting up your sign…</p>
             {[48, 96, 40].map((h, i) => (
               <div key={i} className="animate-pulse rounded-2xl bg-almond" style={{ height: h }} />
             ))}
           </div>
         ) : draft ? (
           <div className="flex flex-col gap-5">
-            <p className="text-walnut/85">
-              {draft.ai
-                ? "We drafted these from your answers. Change anything you like."
-                : "Our writing helper is resting, so fill these in yourself."}
-            </p>
-            <Field
-              id="d-tagline"
-              label="Tagline"
-              badge={draft.ai && <AITag />}
-              hint={`${draft.tagline.length}/80`}
-            >
+            <p className="text-walnut/85">This is what buyers see first. Change anything you like.</p>
+            <Field id="d-tagline" label="Tagline" hint={`${draft.tagline.length}/80`}>
               <input
                 id="d-tagline"
                 maxLength={80}
@@ -307,7 +297,7 @@ export function BusinessSurvey() {
                 className={inputClass}
               />
             </Field>
-            <Field id="d-bio" label="Bio" badge={draft.ai && <AITag />} hint={`${draft.bio.length}/300`}>
+            <Field id="d-bio" label="Bio" hint={`${draft.bio.length}/300`}>
               <textarea
                 id="d-bio"
                 rows={4}
@@ -321,7 +311,6 @@ export function BusinessSurvey() {
               label="Search tags"
               value={draft.tags}
               onChange={(tags) => setDraft({ ...draft, tags })}
-              badge={draft.ai && <AITag />}
             />
             <button
               type="button"
@@ -329,7 +318,7 @@ export function BusinessSurvey() {
               disabled={busy}
               className="min-h-11 w-fit font-semibold text-bark underline underline-offset-4 disabled:text-walnut/40"
             >
-              Write it again
+              Suggest different wording
             </button>
           </div>
         ) : (
@@ -396,17 +385,15 @@ export function BusinessSurvey() {
             >
               Back
             </WoodButton>
+          ) : cancelHref ? (
+            <WoodButton href={cancelHref} variant="secondary">
+              Not now
+            </WoodButton>
           ) : (
             <span />
           )}
           <WoodButton type="submit" size="lg" disabled={busy || (step === 5 && !draft)}>
-            {step === 5
-              ? busy && draft
-                ? "Opening…"
-                : "Open my treehouse"
-              : step === 4
-                ? "Write my shop"
-                : "Next"}
+            {step === 5 ? (busy && draft ? "Opening…" : "Open my treehouse") : step === 4 ? "Next" : "Next"}
           </WoodButton>
         </div>
       </form>

@@ -83,7 +83,7 @@ export default async function SellerPage() {
                 title="No listings yet"
                 action={<WoodButton href="/seller/listings/new">Add your first listing</WoodButton>}
               >
-                Add photos of your work and we&apos;ll help write the listing.
+                Add photos of your work to create your first listing.
               </EmptyState>
             </CreamCard>
           )}

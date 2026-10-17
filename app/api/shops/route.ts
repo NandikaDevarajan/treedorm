@@ -2,7 +2,9 @@ import { ObjectId } from "mongodb";
 import { apiError, parseBody } from "@/lib/api";
 import { rolesFor, sessionFromUser, setSessionCookie } from "@/lib/auth";
 import { collections, type Availability, type ShopDoc } from "@/lib/collections";
-import { getSellerContext } from "@/lib/seller";
+import { getSession } from "@/lib/auth";
+import { getOpenerContext } from "@/lib/seller";
+import { parseShopQuery, searchShops } from "@/lib/shop-search";
 import { slugify } from "@/lib/slug";
 import { shopCreateBody } from "@/lib/validators";
 
@@ -12,8 +14,8 @@ import { shopCreateBody } from "@/lib/validators";
  * /api/shops/preview and this saves the seller-edited result, so edits aren't overwritten.
  */
 export async function POST(req: Request) {
-  const ctx = await getSellerContext();
-  if (!ctx) return apiError(403, "not_business", "Only business accounts can open a treehouse.");
+  const ctx = await getOpenerContext();
+  if (!ctx) return apiError(403, "not_business", "Sign in to open a treehouse.");
   if (ctx.shop) return apiError(409, "has_shop", "You already have a treehouse.");
 
   const parsed = await parseBody(req, shopCreateBody);
@@ -67,4 +69,19 @@ export async function POST(req: Request) {
     shop: { id: shop._id.toHexString(), slug: shop.slug },
     next: "/seller/listings/new?first=1",
   });
+}
+
+/**
+ * Marketplace browse (SPEC §7 GET /api/shops?category=&q=&sort=). Always limited to the signed-in
+ * user's own school; a `school` parameter is ignored so nobody can browse another campus.
+ */
+export async function GET(req: Request) {
+  const session = await getSession();
+  if (!session) return apiError(401, "unauthenticated", "Sign in first.");
+  const params = new URL(req.url).searchParams;
+  const shops = await searchShops(
+    session.schoolDomain,
+    parseShopQuery({ q: params.get("q"), category: params.get("category"), sort: params.get("sort") }),
+  );
+  return Response.json({ shops });
 }

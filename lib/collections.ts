@@ -36,6 +36,66 @@ export interface RateLimitDoc {
 
 export type SchoolDoc = School;
 
+export type OrderStatus =
+  | "pending_payment"
+  | "authorized"
+  | "service_done"
+  | "checking"
+  | "passed"
+  | "mismatch"
+  | "captured"
+  | "partially_refunded"
+  | "canceled"
+  | "expired";
+
+/** SPEC §6 orders (booking and payments arrive in Phase 7; the seed adds past ones). */
+export interface OrderDoc {
+  _id: ObjectId;
+  buyerId: ObjectId;
+  sellerId: ObjectId;
+  shopId: ObjectId;
+  listingId: ObjectId;
+  slot: { start: Date; end: Date };
+  customText?: string;
+  amountCents: number;
+  status: OrderStatus;
+  stripe: { paymentIntentId: string; capturedCents?: number };
+  check?: {
+    provider: "perceptron" | "gemini";
+    verdict: "pass" | "mismatch" | "unsure";
+    confidence: number;
+    reasons: string[];
+    ocrText?: string;
+    checkedAt: Date;
+  };
+  resolution?: {
+    action: "auto_capture" | "accept" | "partial" | "cancel";
+    byUserId: ObjectId | null;
+    at: Date;
+  };
+  createdAt: Date;
+  settledAt?: Date;
+  /** Set on seed data so re-running the seed updates instead of duplicating. */
+  seedKey?: string;
+}
+
+export interface ReviewDoc {
+  _id: ObjectId;
+  orderId: ObjectId;
+  shopId: ObjectId;
+  buyerId: ObjectId;
+  rating: 1 | 2 | 3 | 4 | 5;
+  body: string;
+  createdAt: Date;
+  seedKey?: string;
+}
+
+/** Mongo fallback for buyer memory (SPEC §10). */
+export interface BuyerMemoryDoc {
+  buyerId: ObjectId;
+  events: { type: "order_settled"; category: CategoryId; shopId: ObjectId; listingId: ObjectId; at: Date }[];
+}
+
 export interface Photo {
   url: string;
   publicId: string;
@@ -108,6 +168,10 @@ export function ensureIndexes(): Promise<unknown> {
       db.collection("shops").createIndex({ ownerId: 1 }, { unique: true }),
       db.collection("shops").createIndex({ schoolDomain: 1 }),
       db.collection("listings").createIndex({ shopId: 1 }),
+      db.collection("orders").createIndex({ buyerId: 1 }),
+      db.collection("orders").createIndex({ sellerId: 1 }),
+      db.collection("reviews").createIndex({ orderId: 1 }, { unique: true }),
+      db.collection("buyer_memory").createIndex({ buyerId: 1 }, { unique: true }),
     ]);
   })().catch((err) => {
     indexes = undefined;
@@ -126,6 +190,9 @@ export async function collections() {
     schools: db.collection<SchoolDoc>("schools"),
     shops: db.collection<ShopDoc>("shops"),
     listings: db.collection<ListingDoc>("listings"),
+    orders: db.collection<OrderDoc>("orders"),
+    reviews: db.collection<ReviewDoc>("reviews"),
+    buyerMemory: db.collection<BuyerMemoryDoc>("buyer_memory"),
   };
 }
 

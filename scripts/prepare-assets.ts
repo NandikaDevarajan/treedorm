@@ -408,6 +408,25 @@ async function doorLayers(main: string) {
   );
 }
 
+/**
+ * Category decorations supplied by the team (public/assets/decorations/<category>…), cut out of their
+ * white backgrounds for the treehouse variants. Output: decorations/cut/<category>.png
+ */
+const DECORATIONS: Record<string, string> = {
+  fitness: "decorations/fitness clipart.jpg",
+  photography: "decorations/photography.png",
+  reselling: "decorations/reselling.jpg",
+};
+
+async function decorations() {
+  console.log("category decorations");
+  for (const [category, file] of Object.entries(DECORATIONS)) {
+    const raw = await loadRaw(src(file));
+    removeBackground(raw, [255, 255, 255], 22);
+    await writePng(raw, src(`decorations/cut/${category}.png`), 2);
+  }
+}
+
 /** PWA + favicon icons, cropped square around the cabin in treehouse-main. */
 async function icons() {
   console.log("app icons");
@@ -444,6 +463,7 @@ async function main() {
   await treehouse();
   await creatures();
   await leaves();
+  await decorations();
 }
 
 main().catch((err) => {

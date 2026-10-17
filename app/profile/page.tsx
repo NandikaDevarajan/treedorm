@@ -55,6 +55,27 @@ export default async function ProfilePage() {
           </dl>
         </CreamCard>
 
+        {user.accountType === "business" ? (
+          <CreamCard className="flex flex-col gap-3">
+            <h2 className="font-display text-3xl text-bark">Your treehouse</h2>
+            <p className="text-walnut/85">Manage your shop, listings and storefront.</p>
+            <WoodButton href="/seller" variant="secondary">
+              Go to your treehouse
+            </WoodButton>
+          </CreamCard>
+        ) : (
+          <CreamCard className="flex flex-col gap-3">
+            <h2 className="font-display text-3xl text-bark">Sell something too?</h2>
+            <p className="text-walnut/85">
+              Open your own treehouse to offer haircuts, bakes, lessons or anything you make. You keep your
+              hedgehog and can still book from other shops.
+            </p>
+            <WoodButton href="/onboarding/business" variant="secondary">
+              Open your treehouse
+            </WoodButton>
+          </CreamCard>
+        )}
+
         <div className="flex justify-center">
           <LogoutButton />
         </div>

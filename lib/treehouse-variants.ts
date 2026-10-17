@@ -22,6 +22,8 @@ export interface TreehouseVariant {
 }
 
 const d = (name: string) => `/assets/decorations/${name}.svg`;
+/** Decorations supplied by the team, cut out by prepare-assets (decorations/cut/<category>.png). */
+const art = (category: string) => `/assets/decorations/cut/${category}.png`;
 
 // Anchors on treehouse-main: the left balcony rail top is at y≈357 (x 205–390); the right railing
 // front (for hanging signs) is x 445–515, y 362–395; the front roof edge is at y≈300.
@@ -45,15 +47,12 @@ export const TREEHOUSE_VARIANTS: Record<CategoryId, TreehouseVariant> = {
   fitness: {
     id: "fitness",
     label: "Fitness",
-    overlays: [{ src: d("sign-fitness"), x: 450, y: 357, w: 60, h: 44 }],
+    overlays: [{ src: art("fitness"), x: 290, y: 315, w: 62, h: 44 }],
   },
   photography: {
     id: "photography",
     label: "Photography",
-    overlays: [
-      { src: d("camera"), x: 300, y: 324, w: 48, h: 35 },
-      { src: d("sign-photo"), x: 450, y: 357, w: 60, h: 44 },
-    ],
+    overlays: [{ src: art("photography"), x: 302, y: 322, w: 40, h: 37 }],
   },
   tutoring: {
     id: "tutoring",
@@ -71,10 +70,7 @@ export const TREEHOUSE_VARIANTS: Record<CategoryId, TreehouseVariant> = {
   reselling: {
     id: "reselling",
     label: "Reselling",
-    overlays: [
-      { src: d("sign-market"), x: 450, y: 357, w: 60, h: 44 },
-      { src: d("parcel"), x: 300, y: 323, w: 42, h: 36 },
-    ],
+    overlays: [{ src: art("reselling"), x: 300, y: 313, w: 47, h: 46 }],
   },
   other: { id: "other", label: "Other", overlays: [] },
 };

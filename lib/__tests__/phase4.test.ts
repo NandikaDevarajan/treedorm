@@ -95,3 +95,20 @@ describe("formatting", () => {
     expect(formatAvailability([])).toBe("By arrangement");
   });
 });
+
+import { parseShopQuery } from "@/lib/shop-query";
+
+describe("marketplace query (SPEC §9.10)", () => {
+  it("keeps valid params", () =>
+    expect(parseShopQuery({ q: "  cake ", category: "food", sort: "rating" })).toEqual({
+      q: "cake",
+      category: "food",
+      sort: "rating",
+    }));
+  it("drops unknown categories and sorts", () =>
+    expect(parseShopQuery({ q: "", category: "weapons", sort: "cheapest" })).toEqual({
+      q: undefined,
+      category: undefined,
+      sort: undefined,
+    }));
+});

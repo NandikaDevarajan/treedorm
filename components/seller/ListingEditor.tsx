@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import { inputClass, textareaClass } from "@/components/seller/field";
 import { TagEditor } from "@/components/seller/TagEditor";
-import { AITag } from "@/components/woodland/AITag";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { cn } from "@/lib/cn";
 
@@ -185,8 +184,7 @@ export function ListingEditor({
             {first ? "Add your first listing" : "Add a listing"}
           </h1>
           <p className="text-walnut/85">
-            Add 1–5 photos of your work. We&apos;ll draft the title, description, price and photo checkpoints
-            for you to edit.
+            Add 1–5 photos of your work, then check the details before you publish.
           </p>
         </div>
 
@@ -276,15 +274,11 @@ export function ListingEditor({
 
         {error && <ErrorText>{error}</ErrorText>}
         <WoodButton size="lg" onClick={write} disabled={!ready.length || uploading || busy === "writing"}>
-          {busy === "writing"
-            ? "Writing your listing…"
-            : uploading
-              ? "Uploading photos…"
-              : "Write my listing"}
+          {busy === "writing" ? "Getting your listing ready…" : uploading ? "Uploading photos…" : "Continue"}
         </WoodButton>
         {busy === "writing" && (
           <div role="status" className="flex flex-col gap-3">
-            <span className="sr-only">Writing your listing</span>
+            <span className="sr-only">Getting your listing ready</span>
             {[44, 88, 44, 120].map((h, i) => (
               <div key={i} className="animate-pulse rounded-2xl bg-almond" style={{ height: h }} />
             ))}
@@ -295,17 +289,12 @@ export function ListingEditor({
   }
 
   // ---- Step 2: review & publish ---------------------------------------------------------------
-  const ai = listing.aiAssisted && <AITag />;
   const set = (patch: Partial<ListingFields>) => setListing({ ...listing, ...patch });
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="font-display text-4xl leading-tight text-bark">Check your listing</h1>
-        <p className="text-walnut/85">
-          {listing.aiAssisted
-            ? "Drafted from your photos. Change anything before you publish."
-            : "Fill in the details before you publish."}
-        </p>
+        <p className="text-walnut/85">Check every detail and change anything before you publish.</p>
       </div>
 
       <ul className="flex gap-3 overflow-x-auto pb-1">
@@ -319,7 +308,7 @@ export function ListingEditor({
         ))}
       </ul>
 
-      <Field id="l-title" label="Title" badge={ai} hint={`${listing.title.length}/80`}>
+      <Field id="l-title" label="Title" hint={`${listing.title.length}/80`}>
         <input
           id="l-title"
           maxLength={80}
@@ -328,7 +317,7 @@ export function ListingEditor({
           className={inputClass}
         />
       </Field>
-      <Field id="l-desc" label="Description" badge={ai} hint={`${listing.description.length}/500`}>
+      <Field id="l-desc" label="Description" hint={`${listing.description.length}/500`}>
         <textarea
           id="l-desc"
           rows={5}
@@ -338,7 +327,7 @@ export function ListingEditor({
           className={textareaClass}
         />
       </Field>
-      <Field id="l-price" label="Price" badge={ai}>
+      <Field id="l-price" label="Price">
         <div className="relative max-w-48">
           <span aria-hidden className="absolute top-1/2 left-4 -translate-y-1/2 font-semibold text-walnut/70">
             $
@@ -352,12 +341,11 @@ export function ListingEditor({
           />
         </div>
       </Field>
-      <TagEditor label="Search tags" value={listing.tags} onChange={(tags) => set({ tags })} badge={ai} />
+      <TagEditor label="Search tags" value={listing.tags} onChange={(tags) => set({ tags })} />
 
       <fieldset>
         <div className="mb-1.5 flex items-center justify-between gap-2">
           <legend className="font-semibold">Photo checkpoints</legend>
-          {ai}
         </div>
         <p className="mb-3 text-sm text-walnut/75">
           What a buyer&apos;s photo of the finished result should show. These are used to check the result

@@ -29,10 +29,11 @@ Still cartoon decorations — never animated, never avatars. Always shown **sitt
 |---|---|---|
 | creatures/woodland creature animations.jpg | source | Flat-style sticker sheet (static, despite the name). Cut-outs below. Its hedgehog is skipped (avatar-only) and its bear touches a tree, so isn't cut |
 | creatures/more woodland creature animations.jpg | source | Soft-style sticker sheet. Cut-outs below. Its hedgehog is skipped (avatar-only) |
-| creatures/cutouts/rabbit-soft.png | derived | Empty states — sits above the message (`EmptyState`, phase placeholders) |
-| creatures/cutouts/deer-soft.png | derived | Loading screens — eyes closed, resting on the grass (`LoadingState`, app/loading.tsx) |
+| creatures/cutouts/rabbit-soft.png | derived | Empty states — sits above the message (`EmptyState`; marketplace "No treehouses match") |
+| creatures/cutouts/deer-soft.png | derived | Loading — resting on the grass (`LoadingState`, app/loading.tsx) and small beside "Searching…" on /market |
 | creatures/cutouts/fox-soft.png | derived | Sits beside "Photo check passed" (Phase 8; shown in /dev/styleguide now) |
-| creatures/cutouts/bear-soft.png, moose-soft.png, wolf-soft.png, woodpecker-soft.png, raccoon-soft.png, owl-soft.png, squirrel-soft.png | derived | Not placed yet — available for later screens; catalogue in /dev/styleguide |
+| creatures/cutouts/squirrel-soft.png | derived | Marketplace "No treehouses at {school} yet" empty state, sitting above the message |
+| creatures/cutouts/bear-soft.png, moose-soft.png, wolf-soft.png, woodpecker-soft.png, raccoon-soft.png, owl-soft.png | derived | Not placed yet — available for later screens; catalogue in /dev/styleguide |
 | creatures/cutouts/bird-flat.png, deer-flat.png, fox-flat.png, owl-flat.png, rabbit-flat.png, raccoon-flat.png, squirrel-flat.png | derived | Not placed yet (flat style kept as an alternative set); catalogue in /dev/styleguide |
 
 Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, then update this table.
@@ -51,7 +52,11 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 | foliage/vine-placeholder.svg | placeholder | `PLACEHOLDER-ART` heart-leaf vine matching the Shutterstock reference. Used by `VineBorder` via `VINE_SRC` — signup/login, styleguide, /market. viewBox includes every leaf so nothing clips |
 | foliage/leaf-maple-orange.png, leaf-maple-red.png, leaf-yellow.png, leaf-oak.png | derived | Autumn leaves cut from "woodland creature animations.jpg"; scattered, still, over the calm page backgrounds (`LeafyBackground`: home, signup, login, account type, 404); orange + yellow also drift down the homepage scene as its idle motion. Small source — keep under ~40px |
 | foliage/vine-branch.png | missing | Licensed transparent watercolor vine (preview in design/reference/). When added, change `VINE_SRC` in components/woodland/VineBorder.tsx |
-| decorations/flower-box.svg, food-basket.svg, camera.svg, books.svg, bunting.svg, yarn.svg, parcel.svg, sign-fitness.svg, sign-photo.svg, sign-market.svg | placeholder | `PLACEHOLDER-ART` category decorations for the treehouse variants (`lib/treehouse-variants.ts`): Beauty, Food, Fitness, Photography (camera + photo sign), Tutoring, Crafts (bunting + yarn), Reselling (market sign + parcel). Other has none |
+| decorations/fitness clipart.jpg | source (team) | Water bottle, shoe, dumbbell and stopwatch clipart on white. Cut out to `decorations/cut/fitness.png` |
+| decorations/photography.png | source (team) | Flat camera icon on white. Cut out to `decorations/cut/photography.png` |
+| decorations/reselling.jpg | source (team) | Online-shopping scene (person, laptop, coins) on white. Cut out to `decorations/cut/reselling.png` |
+| decorations/cut/fitness.png, photography.png, reselling.png | derived | `prepare-assets` cut-outs; the Fitness, Photography and Reselling treehouse decorations (small, on the left balcony rail) on previews, tiles and storefronts |
+| decorations/flower-box.svg, food-basket.svg, books.svg, bunting.svg, yarn.svg | placeholder | `PLACEHOLDER-ART` for categories still without team art: Beauty (flower box), Food (fruit basket), Tutoring (books), Crafts (bunting + yarn). Other has no decoration |
 
 ## Fonts
 | File | Role |
@@ -65,3 +70,6 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 ## Reference only — never shipped (`design/reference/`)
 `moods/forest animations.jpg`, `moods/forest animations 2.jpg`: painted sunlit forest scenes — **mood only** (light rays, dirt paths, mushrooms, wildflowers, hollow-tree door). Never placed, cropped, traced or imported (SPEC §9.16); they guide the warm tones and calm textured backgrounds.
 vine-branch-shutterstock-preview.webp (watermarked), treehouse-envato-preview.jpg (watermarked, don't use), ref-uw-course-planner-login.png (accent-on-form reference), ref-uw-netid-login.png (what **not** to copy).
+
+## Seed listing photos (not in the repo)
+Seed listings (`scripts/seed-data.ts`) use stable Unsplash images loaded from images.unsplash.com, each checked by eye to match its listing. IDs and credits are in CREDITS.md.

@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     return apiError(400, "bad_photo", "Those photos didn't come from this treehouse's uploads.");
   }
   if (!(await rateLimit(`ai:listing:${ctx.session.userId}`, 30, HOUR))) {
-    return apiError(429, "rate_limited", "That's a lot of drafts — try again in a little while.");
+    return apiError(429, "rate_limited", "Too many tries for now — try again in a little while.");
   }
 
   // Send Gemini smaller copies, fetched from Cloudinary.
