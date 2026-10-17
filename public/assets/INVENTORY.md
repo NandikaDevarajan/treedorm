@@ -19,7 +19,6 @@ re-run. Next `<Image>` serves everything as WebP/AVIF at the requested size, so 
 | characters/hedgehog-default.avif | source | Hedgehog in orange beanie holding a maple leaf, cream background with scattered leaves |
 | characters/hedgehog-default.png | derived | Transparent cut-out (background + loose leaves removed). **The only avatar base — every user is this hedgehog** (+ optional hat/sunglasses). Beanie is baked in |
 | characters/hedgehog-email.png | derived | 240px copy embedded inline in the sign-in email (lib/email) |
-| characters/woodland-spirits-sheet.jpg | source | Captioned sheet of woodland spirits/sprites. **Not used anywhere** — removed from the app on request; no crops are generated |
 
 ## Woodland creatures (SPEC §9.15)
 Still cartoon decorations — never animated, never avatars. Always shown **sitting openly on a patch of grass** (`<Creature>`), never peeking, perching or half-hidden. At most 1–2 on screen at once (the styleguide catalogue is the only exception).

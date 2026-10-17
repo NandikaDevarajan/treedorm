@@ -3,8 +3,8 @@ import { National_Park } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// SPEC §9.3: Bloom Spring for titles, short headings, treehouse names and decorative labels only;
-// National Park for everything else.
+// SPEC §9.3: Bloom Spring for big headings only (page titles, section headings, treehouse names);
+// National Park for all other text.
 const display = localFont({
   src: "../public/assets/fonts/Bloom Spring.otf",
   variable: "--font-display",

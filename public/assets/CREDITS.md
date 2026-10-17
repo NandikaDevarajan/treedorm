@@ -6,7 +6,6 @@ Fill in the source and license for every image and font before making the repo p
 | treehouse/treehouse-main.jpg | ? | ? |
 | treehouse/treehouse-hedgehog.webp | ? | ? |
 | characters/hedgehog-default.avif | ? | ? |
-| characters/woodland-spirits-sheet.jpg | ? | ? |
 | accessories/sunglasses-sheet.jpg | ? | ? |
 | foliage/vine-branch.png | Shutterstock 2628424599 | license required before use |
 | fonts/Bloom Spring.otf | Keithzo (https://keithzo.com/), via 1001fonts.com | Free for personal use. "© Keithzo 2025, All Rights Reserved" — commercial use needs a license from Keithzo |
