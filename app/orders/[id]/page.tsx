@@ -23,7 +23,7 @@ export default async function OrderPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ held?: string }>;
+  searchParams: Promise<{ paid?: string }>;
 }) {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -32,7 +32,7 @@ export default async function OrderPage({
   if (!access) notFound();
   const order = await syncOrderWithStripe(access.order);
   const { role } = access;
-  const { held } = await searchParams;
+  const { paid } = await searchParams;
   const { shops, listings } = await collections();
   const [shop, listing] = await Promise.all([
     shops.findOne({ _id: order.shopId }),
@@ -64,7 +64,7 @@ export default async function OrderPage({
         >
           <span aria-hidden>←</span> {role === "buyer" ? "Your orders" : "Seller dashboard"}
         </Link>
-        {held && order.status === "authorized" && role === "buyer" && (
+        {paid && role === "buyer" && order.status === "authorized" && (
           <div role="status" className="rounded-card border-2 border-leaf/50 bg-sage/40 p-4">
             <p className="font-bold">You&apos;re booked!</p>
             <p className="text-sm">
@@ -107,6 +107,11 @@ export default async function OrderPage({
         </CreamCard>
 
         <div className="flex flex-col gap-3">
+          {paid && role === "buyer" && order.status === "pending_payment" && (
+            <p role="status" className="rounded-2xl bg-almond px-4 py-3 text-sm">
+              Confirming your payment with Stripe… refresh in a moment.
+            </p>
+          )}
           {role === "buyer" && order.status === "pending_payment" && (
             <WoodButton href={`/checkout/${id}`} size="lg">
               Finish payment

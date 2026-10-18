@@ -9,6 +9,8 @@ import { formatCents } from "@/lib/money";
 import { formatSlot, SHOP_TZ, type Slot } from "@/lib/slots";
 
 interface Props {
+  /** Came back from Stripe's cancel_url. */
+  canceled?: boolean;
   listingId: string;
   priceCents: number;
   customTextAllowed: boolean;
@@ -30,10 +32,11 @@ const timeLabel = (iso: string) =>
 
 /**
  * Booking (SPEC §3.2 step 6): pick a day and a time from the shop's hours (booked or too-soon times
- * are greyed out), add custom words if the listing allows them, then Book → order + payment hold.
+ * are greyed out), add custom words if the listing allows them, then Book → order + Stripe Checkout
+ * (card authorized only).
  * On phones the picker opens in a bottom sheet and Book sticks to the bottom of the screen.
  */
-export function BookingPanel({ listingId, priceCents, customTextAllowed, slots, blocked }: Props) {
+export function BookingPanel({ canceled, listingId, priceCents, customTextAllowed, slots, blocked }: Props) {
   const router = useRouter();
   const days = useMemo(() => {
     const map = new Map<string, Slot[]>();
@@ -67,7 +70,8 @@ export function BookingPanel({ listingId, priceCents, customTextAllowed, slots, 
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message ?? "Couldn't book that. Try again.");
-      router.push(json.next);
+      // Stripe-hosted Checkout, in the same tab (SPEC §7).
+      window.location.assign(json.url);
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
@@ -160,6 +164,11 @@ export function BookingPanel({ listingId, priceCents, customTextAllowed, slots, 
     <>
       <aside className="flex flex-col gap-5 rounded-card border border-bark/15 bg-cream p-5 shadow-soft md:sticky md:top-6">
         <h2 className="font-display text-3xl text-bark">Book a time</h2>
+        {canceled && (
+          <p role="status" className="rounded-2xl bg-almond px-4 py-3 text-sm">
+            Checkout was canceled, so nothing was held. Pick a time to try again.
+          </p>
+        )}
         {/* Phones: the picker opens in a sheet. Desktop: inline. */}
         <div className="md:hidden">
           <button
@@ -208,7 +217,7 @@ export function BookingPanel({ listingId, priceCents, customTextAllowed, slots, 
         )}
         <div className="fixed inset-x-0 bottom-[var(--tabbar-h,0px)] z-30 border-t-2 border-bark/15 bg-cream/95 px-safe pt-3 pb-3 backdrop-blur-sm md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
           <WoodButton size="lg" className="w-full" onClick={book} disabled={busy}>
-            {busy ? "Booking…" : slot ? `Book · ${formatCents(priceCents)}` : "Pick a time"}
+            {busy ? "Taking you to checkout…" : slot ? `Book · ${formatCents(priceCents)}` : "Pick a time"}
           </WoodButton>
         </div>
       </aside>

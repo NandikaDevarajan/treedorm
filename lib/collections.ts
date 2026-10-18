@@ -59,7 +59,13 @@ export interface OrderDoc {
   customText?: string;
   amountCents: number;
   status: OrderStatus;
-  stripe: { paymentIntentId: string; capturedCents?: number };
+  stripe: {
+    /** Set when Checkout completes (the authorized, uncaptured PaymentIntent); "" until then. */
+    paymentIntentId: string;
+    /** The Stripe Checkout Session the buyer was sent to (SPEC §7). */
+    checkoutSessionId?: string;
+    capturedCents?: number;
+  };
   check?: {
     provider: "perceptron" | "gemini";
     verdict: "pass" | "mismatch" | "unsure";

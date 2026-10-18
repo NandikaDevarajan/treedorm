@@ -125,3 +125,46 @@ describe("Stripe webhook signature (SPEC §7)", () => {
     expect((await call(header)).status).toBe(200);
   });
 });
+
+import { checkoutSessionParams } from "@/lib/checkout";
+
+describe("Stripe Checkout Session (SPEC §7)", () => {
+  const now = new Date("2026-10-17T16:00:00Z");
+  const params = checkoutSessionParams({
+    orderId: "abc123",
+    listingTitle: "Custom birthday cake",
+    shopName: "Sweet Dorm Bakes",
+    slotLabel: "Fri, Oct 23 · 4:00 PM",
+    customText: "Happy Birthday Maya",
+    amountCents: 4000,
+    buyerEmail: "demo.buyer@uw.edu",
+    origin: "http://localhost:3000",
+    listingPath: "/t/sweet-dorm-bakes/l1",
+    now,
+  });
+
+  it("only authorizes the card (manual capture), with no payment_method_types", () => {
+    expect(params.payment_intent_data?.capture_method).toBe("manual");
+    expect(params.mode).toBe("payment");
+    expect(params).not.toHaveProperty("payment_method_types");
+  });
+
+  it("has one line item with the listing name, price and shop, and pre-fills the email", () => {
+    expect(params.line_items).toHaveLength(1);
+    const item = params.line_items![0].price_data!;
+    expect(item.unit_amount).toBe(4000);
+    expect(item.product_data?.name).toBe("Custom birthday cake");
+    expect(item.product_data?.description).toContain("Sweet Dorm Bakes");
+    expect(params.customer_email).toBe("demo.buyer@uw.edu");
+    expect(params.metadata?.orderId).toBe("abc123");
+  });
+
+  it("returns to the order on success and cancels back to the listing", () => {
+    expect(params.success_url).toBe("http://localhost:3000/orders/abc123?paid=1");
+    expect(params.cancel_url).toBe(
+      "http://localhost:3000/checkout/abc123/cancel?back=%2Ft%2Fsweet-dorm-bakes%2Fl1",
+    );
+    expect(params.expires_at).toBe(Math.floor(now.getTime() / 1000) + 30 * 60);
+    expect(params.integration_identifier).toMatch(/^treedorm-booking-[a-z]{8}$/);
+  });
+});

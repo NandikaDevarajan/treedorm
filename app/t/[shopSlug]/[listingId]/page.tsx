@@ -14,7 +14,10 @@ import { collections } from "@/lib/collections";
 import { formatCents } from "@/lib/money";
 import { slotsFor } from "@/lib/orders";
 
-type Props = { params: Promise<{ shopSlug: string; listingId: string }> };
+type Props = {
+  params: Promise<{ shopSlug: string; listingId: string }>;
+  searchParams: Promise<{ canceled?: string }>;
+};
 
 async function load({ shopSlug, listingId }: { shopSlug: string; listingId: string }) {
   if (!ObjectId.isValid(listingId)) return null;
@@ -31,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** Listing page (SPEC §4): photos, details, and booking with a slot picker. */
-export default async function ListingPage({ params }: Props) {
+export default async function ListingPage({ params, searchParams }: Props) {
   const data = await load(await params);
   if (!data) notFound();
   const { shop, listing } = data;
@@ -39,6 +42,7 @@ export default async function ListingPage({ params }: Props) {
   const isOwner = session?.userId === shop.ownerId.toHexString();
   const sameSchool = session?.schoolDomain === shop.schoolDomain;
   const slots = await slotsFor(shop, listing);
+  const { canceled } = await searchParams;
 
   return (
     <LeafyBackground tone="almond">
@@ -88,6 +92,7 @@ export default async function ListingPage({ params }: Props) {
         </div>
 
         <BookingPanel
+          canceled={canceled === "1"}
           listingId={listing._id.toHexString()}
           priceCents={listing.priceCents}
           customTextAllowed={listing.customTextAllowed}

@@ -1,5 +1,5 @@
 import type Stripe from "stripe";
-import { markAuthorized, markCanceled } from "@/lib/orders";
+import { authorizeFromCheckout, expireCheckout, markCanceled } from "@/lib/orders";
 import { stripe } from "@/lib/stripe";
 
 /**
@@ -25,20 +25,17 @@ export async function POST(req: Request) {
 
   try {
     switch (event.type) {
-      case "payment_intent.amount_capturable_updated":
-        // Manual capture: the card is authorized and the money is held.
-        await markAuthorized(event.data.object.id);
+      case "checkout.session.completed":
+        // Manual capture: the card is authorized (payment_status stays "unpaid" until capture).
+        // authorizeFromCheckout checks the PaymentIntent is requires_capture and saves its id.
+        await authorizeFromCheckout(event.data.object);
+        break;
+      case "checkout.session.expired":
+        await expireCheckout(event.data.object.id);
         break;
       case "payment_intent.canceled":
+        // A held payment was released later (e.g. the buyer cancels after a mismatch, Phase 8).
         await markCanceled(event.data.object.id);
-        break;
-      case "payment_intent.payment_failed":
-        // The buyer stays on checkout and can try another card; nothing to change.
-        console.info(
-          "[stripe] payment failed for",
-          event.data.object.id,
-          event.data.object.last_payment_error?.code,
-        );
         break;
       default:
         break;

@@ -1,4 +1,6 @@
 import { ObjectId, type WithId } from "mongodb";
+import type Stripe from "stripe";
+import { checkoutSessionParams } from "@/lib/checkout";
 import {
   collections,
   type ListingDoc,
@@ -10,7 +12,7 @@ import { formatCents } from "@/lib/money";
 import { buildSlots, formatSlot, type Slot } from "@/lib/slots";
 import { stripe } from "@/lib/stripe";
 
-/** Unpaid checkouts give their slot back after this long. */
+/** Unpaid checkouts give their slot back after this long (same as the Checkout Session lifetime). */
 export const PENDING_TTL_MS = 30 * 60 * 1000;
 
 /** Orders that occupy their time slot. */
@@ -27,7 +29,7 @@ export const SLOT_HOLDING: OrderStatus[] = [
 
 export const slotKey = (shopId: ObjectId, start: Date) => `${shopId.toHexString()}|${start.toISOString()}`;
 
-/** Expires unpaid checkouts older than PENDING_TTL_MS: frees the slot and cancels the Stripe hold. */
+/** Expires unpaid checkouts older than PENDING_TTL_MS: frees the slot and closes the Checkout Session. */
 export async function expireStalePending(filter: { shopId?: ObjectId } = {}) {
   const { orders } = await collections();
   const stale = await orders
@@ -38,10 +40,10 @@ export async function expireStalePending(filter: { shopId?: ObjectId } = {}) {
       { _id: o._id, status: "pending_payment" },
       { $set: { status: "expired", settledAt: new Date() }, $unset: { slotKey: "" } },
     );
-    if (res.modifiedCount && o.stripe.paymentIntentId) {
+    if (res.modifiedCount && o.stripe.checkoutSessionId) {
       await stripe()
-        .paymentIntents.cancel(o.stripe.paymentIntentId)
-        .catch(() => {}); // may already be canceled
+        .checkout.sessions.expire(o.stripe.checkoutSessionId)
+        .catch(() => {}); // may already be expired
     }
   }
 }
@@ -69,39 +71,76 @@ export async function slotsFor(
 }
 
 /**
- * Keeps an order in step with its PaymentIntent. The webhook does this normally; this also runs when
- * a buyer opens the order, so a missed or delayed webhook can't leave it stuck as "pending".
+ * Keeps a pending order in step with its Checkout Session. The webhook does this normally; this also
+ * runs when the buyer lands back on the order, so a missed or delayed webhook can't leave it stuck.
  */
 export async function syncOrderWithStripe(order: WithId<OrderDoc>): Promise<WithId<OrderDoc>> {
-  if (order.status !== "pending_payment" || !order.stripe.paymentIntentId) return order;
+  if (order.status !== "pending_payment" || !order.stripe.checkoutSessionId) return order;
   try {
-    const pi = await stripe().paymentIntents.retrieve(order.stripe.paymentIntentId);
-    if (pi.status === "requires_capture") return (await markAuthorized(pi.id)) ?? order;
-    if (pi.status === "canceled") return (await markCanceled(pi.id)) ?? order;
+    const session = await stripe().checkout.sessions.retrieve(order.stripe.checkoutSessionId);
+    if (session.status === "complete") return (await authorizeFromCheckout(session)) ?? order;
+    if (session.status === "expired") return (await expireCheckout(session.id)) ?? order;
   } catch (err) {
     console.error("[orders] couldn't sync with Stripe:", err);
   }
   return order;
 }
 
-/** Hold succeeded (webhook `payment_intent.amount_capturable_updated`, or a sync). Idempotent. */
-export async function markAuthorized(paymentIntentId: string) {
+/**
+ * Checkout finished (webhook `checkout.session.completed`, or a sync). With manual capture the card is
+ * authorized, not charged: confirm the PaymentIntent is `requires_capture`, save its id for capturing
+ * after the photo check, mark the order authorized and open the private chat. Idempotent.
+ */
+export async function authorizeFromCheckout(session: Stripe.Checkout.Session) {
+  const orderId = session.metadata?.orderId ?? session.client_reference_id;
+  const piId =
+    typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+  if (!orderId || !ObjectId.isValid(orderId) || !piId) return null;
+  const pi = await stripe().paymentIntents.retrieve(piId);
+  if (pi.status !== "requires_capture") {
+    console.warn(
+      `[orders] checkout ${session.id} completed but its PaymentIntent is ${pi.status}; not authorizing`,
+    );
+    return null;
+  }
   const { orders } = await collections();
   const order = await orders.findOneAndUpdate(
-    { "stripe.paymentIntentId": paymentIntentId, status: "pending_payment" },
-    { $set: { status: "authorized" } },
+    { _id: new ObjectId(orderId), status: "pending_payment", "stripe.checkoutSessionId": session.id },
+    { $set: { status: "authorized", "stripe.paymentIntentId": pi.id } },
     { returnDocument: "after" },
   );
-  if (order?.threadId) {
-    await systemMessage(
-      order.threadId,
-      "Payment held — the card is authorized, not charged. It's only charged once the order is verified.",
-    );
+  if (order) await openThread(order); // only the call that flipped the status gets here
+  return order;
+}
+
+/** Checkout expired unpaid (webhook `checkout.session.expired`, or a sync). Frees the slot. Idempotent. */
+export async function expireCheckout(sessionId: string) {
+  const { orders } = await collections();
+  return orders.findOneAndUpdate(
+    { "stripe.checkoutSessionId": sessionId, status: "pending_payment" },
+    { $set: { status: "expired", settledAt: new Date() }, $unset: { slotKey: "" } },
+    { returnDocument: "after" },
+  );
+}
+
+/** Buyer backed out on Stripe's page (cancel_url): cancel the order, free the slot, close the session. */
+export async function cancelPendingOrder(orderId: string, buyerId: string) {
+  if (!ObjectId.isValid(orderId) || !ObjectId.isValid(buyerId)) return null;
+  const { orders } = await collections();
+  const order = await orders.findOneAndUpdate(
+    { _id: new ObjectId(orderId), buyerId: new ObjectId(buyerId), status: "pending_payment" },
+    { $set: { status: "canceled", settledAt: new Date() }, $unset: { slotKey: "" } },
+    { returnDocument: "after" },
+  );
+  if (order?.stripe.checkoutSessionId) {
+    await stripe()
+      .checkout.sessions.expire(order.stripe.checkoutSessionId)
+      .catch(() => {});
   }
   return order;
 }
 
-/** Hold canceled or expired at Stripe (webhook `payment_intent.canceled`). Frees the slot. Idempotent. */
+/** Hold canceled at Stripe after authorization (webhook `payment_intent.canceled`). Frees the slot. Idempotent. */
 export async function markCanceled(paymentIntentId: string) {
   const { orders } = await collections();
   return orders.findOneAndUpdate(
@@ -129,6 +168,28 @@ export async function systemMessage(threadId: ObjectId, body: string) {
   await threads.updateOne({ _id: threadId }, { $set: { lastMessageAt: now, lastMessage: body } });
 }
 
+/** The private buyer–seller chat for an order, with the booking note (SPEC §3.2 step 7). */
+async function openThread(order: WithId<OrderDoc>) {
+  if (order.threadId) return;
+  const { threads, orders, listings } = await collections();
+  const listing = await listings.findOne({ _id: order.listingId });
+  const thread = await threads.insertOne({
+    _id: new ObjectId(),
+    orderId: order._id,
+    buyerId: order.buyerId,
+    sellerId: order.sellerId,
+    lastMessageAt: new Date(),
+    createdAt: new Date(),
+  });
+  await orders.updateOne({ _id: order._id }, { $set: { threadId: thread.insertedId } });
+  await systemMessage(
+    thread.insertedId,
+    `New booking: ${listing?.title ?? "listing"} (${formatCents(order.amountCents)}) for ${formatSlot(order.slot.start)}.` +
+      (order.customText ? ` It should say: “${order.customText}”.` : "") +
+      " The card is held, not charged, until the order is verified. Use this chat for the exact place, room number and any details — only the two of you can see it.",
+  );
+}
+
 export class BookingError extends Error {
   constructor(
     public status: number,
@@ -140,18 +201,20 @@ export class BookingError extends Error {
 }
 
 /**
- * Books a slot (SPEC §7 POST /api/orders): checks the slot is still free, creates the order and a
- * Stripe PaymentIntent with manual capture (authorize now, capture after the photo check), and opens
- * the private chat with a booking note. Returns the order id and the PaymentIntent client secret.
+ * Books a slot (SPEC §7 POST /api/orders): checks the slot is still free, creates the order (holding
+ * the slot), then a Stripe-hosted Checkout Session with manual capture. Returns the Checkout URL; the
+ * buyer is sent there in the same tab. The chat opens once the card is authorized.
  */
 export async function createBooking(opts: {
   buyerId: string;
   buyerSchool: string;
+  buyerEmail: string;
   listingId: string;
   slotStart: string;
   customText?: string;
+  origin: string;
 }) {
-  const { listings, shops, orders, threads } = await collections();
+  const { listings, shops, orders } = await collections();
   if (!ObjectId.isValid(opts.listingId))
     throw new BookingError(404, "not_found", "That listing doesn't exist.");
   const listing = await listings.findOne({ _id: new ObjectId(opts.listingId), active: true });
@@ -161,8 +224,9 @@ export async function createBooking(opts: {
   const buyerId = new ObjectId(opts.buyerId);
   if (shop.ownerId.equals(buyerId))
     throw new BookingError(400, "own_shop", "You can't book your own treehouse.");
-  if (shop.schoolDomain !== opts.buyerSchool)
+  if (shop.schoolDomain !== opts.buyerSchool) {
     throw new BookingError(403, "other_school", "You can only book treehouses at your school.");
+  }
 
   const slot = (await slotsFor(shop, listing)).find(
     (s) => s.start === new Date(opts.slotStart).toISOString(),
@@ -191,45 +255,29 @@ export async function createBooking(opts: {
   try {
     await orders.insertOne(order); // the unique slotKey stops two buyers taking the same slot
   } catch (err) {
-    if ((err as { code?: number }).code === 11000)
+    if ((err as { code?: number }).code === 11000) {
       throw new BookingError(409, "slot_taken", "Someone just booked that time. Pick another one.");
+    }
     throw err;
   }
 
   try {
-    const pi = await stripe().paymentIntents.create(
-      {
-        amount: listing.priceCents,
-        currency: "usd",
-        capture_method: "manual", // hold only; captured after the proof-photo check (SPEC §8.5)
-        description: `${shop.name} — ${listing.title}`,
-        metadata: {
-          orderId: orderId.toHexString(),
-          shopId: shop._id.toHexString(),
-          listingId: listing._id.toHexString(),
-        },
-      },
-      { idempotencyKey: `order-${orderId.toHexString()}` },
+    const session = await stripe().checkout.sessions.create(
+      checkoutSessionParams({
+        orderId: orderId.toHexString(),
+        listingTitle: listing.title,
+        shopName: shop.name,
+        slotLabel: formatSlot(start),
+        customText,
+        amountCents: listing.priceCents,
+        buyerEmail: opts.buyerEmail,
+        origin: opts.origin,
+        listingPath: `/t/${shop.slug}/${listing._id.toHexString()}`,
+      }),
+      { idempotencyKey: `checkout-${orderId.toHexString()}` },
     );
-    const thread = await threads.insertOne({
-      _id: new ObjectId(),
-      orderId,
-      buyerId,
-      sellerId: shop.ownerId,
-      lastMessageAt: new Date(),
-      createdAt: new Date(),
-    });
-    await orders.updateOne(
-      { _id: orderId },
-      { $set: { "stripe.paymentIntentId": pi.id, threadId: thread.insertedId } },
-    );
-    await systemMessage(
-      thread.insertedId,
-      `New booking: ${listing.title} (${formatCents(listing.priceCents)}) for ${formatSlot(start)}.` +
-        (customText ? ` It should say: “${customText}”.` : "") +
-        " Use this chat for the exact place, room number and any details — only the two of you can see it.",
-    );
-    return { orderId: orderId.toHexString(), clientSecret: pi.client_secret! };
+    await orders.updateOne({ _id: orderId }, { $set: { "stripe.checkoutSessionId": session.id } });
+    return { orderId: orderId.toHexString(), url: session.url! };
   } catch (err) {
     // Don't leave a slot held by an order that can't be paid.
     await orders.updateOne(
