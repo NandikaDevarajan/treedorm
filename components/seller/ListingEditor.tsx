@@ -22,7 +22,6 @@ export interface ListingFields {
   checkpoints: string[];
   customTextAllowed: boolean;
   photos: EditablePhoto[];
-  aiAssisted: boolean;
 }
 
 type Upload = { key: string; preview: string; status: "uploading" | "done" | "error"; photo?: EditablePhoto };
@@ -130,16 +129,12 @@ export function ListingEditor({
     setBusy("writing");
     setError(null);
     try {
-      const res = await api<{ listing: ListingFields & { _id: string }; ai: boolean }>(
-        "/api/listings",
-        "POST",
-        {
-          photos: ready.map((u) => u.photo),
-          sellerNotes: notes.trim() || undefined,
-        },
-      );
+      const res = await api<{ listing: ListingFields & { _id: string } }>("/api/listings", "POST", {
+        photos: ready.map((u) => u.photo),
+        sellerNotes: notes.trim() || undefined,
+      });
       const l = res.listing;
-      setListing({ ...l, id: l._id, aiAssisted: res.ai });
+      setListing({ ...l, id: l._id });
       setPrice((l.priceCents / 100).toFixed(2));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {

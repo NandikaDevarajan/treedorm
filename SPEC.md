@@ -51,11 +51,11 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 3. **Account type** → choose **Business** (Carmel page, §9.7).
 4. **Business survey** (one question per screen):
    - Business name
-   - Category: Beauty, Food, Fitness, Photography, Tutoring, Crafts, Reselling, Other — **treehouse preview updates live** as they pick (§9.8)
+   - Category: Beauty, Food, Fitness, Photography, Tutoring, Crafts, Reselling, Other — a simple choice (§9.8)
    - What you offer (1–2 sentences)
    - Typical price range
    - Where you work (dorm / building name — *not* room number) and availability (days + time windows)
-5. Gemini uses the survey to generate tagline, short bio, suggested listing titles and tags. Seller edits, previews their category treehouse, confirms and saves.
+5. Gemini uses the survey to generate tagline, short bio, suggested listing titles and tags. Seller edits, confirms and saves.
 6. **Add listings**: upload 1–5 photos → Gemini writes title, description, suggested price, tags and "what the buyer should see" checkpoints (used by the photo check). Seller edits and publishes.
 7. **Storefront** (their treehouse page, §9.10) shows:
    - 🌳 **Verified**: orders that passed the photo check
@@ -82,7 +82,7 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 11. Proof photo deleted after the order settles.
 12. Later, **rebook reminder** ("It's been 4 weeks since your haircut at Fade Lab — rebook?").
 13. Avatar can be changed any time from **Profile → Edit avatar**.
-14. **Switch to Business:** `/profile` shows "Open your treehouse" to Personal users. It runs the business onboarding (survey → treehouse preview → save, with "Not now" back to the profile); saving makes the account Business (`roles: ["buyer","seller"]`) and keeps the hedgehog avatar, survey answers and everything a buyer can do.
+14. **Switch to Business:** `/profile` shows "Open your treehouse" to Personal users. It runs the business onboarding (survey → save, with "Not now" back to the profile); saving makes the account Business (`roles: ["buyer","seller"]`) and keeps the hedgehog avatar, survey answers and everything a buyer can do.
 
 > Note: the original notes said buyer pays after service. We **authorize at booking, capture after the check** — no money moves until verified, but the seller knows the buyer is good for it.
 
@@ -98,7 +98,7 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 | `/onboarding/account-type` | Personal vs Business cards on Carmel (§9.7) |
 | `/onboarding/personal` | Short survey → optional avatar step |
 | `/onboarding/avatar` | Hedgehog + hats + sunglasses, skippable (§9.9) |
-| `/onboarding/business` | Business survey → live category treehouse preview → AI preview → confirm (§9.8) |
+| `/onboarding/business` | Business survey (one question per screen) → editable tagline/bio/tags → confirm (§9.8) |
 | `/market` | **Marketplace search & filter** (§9.10): Almond background, vine border, search, category chips, Ask AI, Rebook strip, treehouse results (only the user's school) |
 | `/ask` | Full AI chat view with match cards |
 | `/t/[shopSlug]` | **Storefront** — the business's treehouse |
@@ -107,7 +107,7 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 | `/orders`, `/orders/[id]`, `/orders/[id]/review` | Orders list, order detail (chat, proof photo, check result, resolve), review |
 | `/messages`, `/messages/[threadId]` | Chat list and thread |
 | `/profile`, `/profile/avatar` | Profile and avatar editing (always available) |
-| `/seller`, `/seller/listings/new`, `/seller/shop` | Seller dashboard, new listing (photos → AI draft → publish), edit treehouse (category/treehouse variant kept) |
+| `/seller`, `/seller/listings/new`, `/seller/shop` | Seller dashboard, new listing (photos → pre-filled details → publish), edit treehouse (category/treehouse variant kept) |
 | `/about` | Business model page (SideShift pitch) |
 | `/trust` | How AI checks work, what data is kept, how to dispute |
 
@@ -115,8 +115,8 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 
 **Content rules**
 - **"Verified" wording:** everywhere users see it (storefront stats, treehouse tiles, badges, success messages) the photo-check count is "🌳 Verified" — never "AI-verified". Internal names (`stats.aiVerified`) stay.
-- **AI on seller pages is invisible:** business onboarding, add/edit listing and edit shop show Gemini's pre-filled tagline, bio, tags and listing fields as normal editable text — no "✨ AI", "AI-assisted" or "we drafted/wrote this" labels or wording. Everything stays editable before saving.
-- Buyer-facing pages may still mark AI-written text with a small "AI-assisted" label (currently the storefront About section, driven by `aiAssisted`).
+- **No AI labels anywhere.** Never show "✨ AI", "AI-assisted", "AI-written" or similar labels or wording — not on seller onboarding, add/edit listing, edit shop, the storefront or any other page. Gemini still pre-fills the tagline, bio, tags and listing drafts; they appear as normal editable text, and the seller can change everything before saving.
+
 - Skeleton / loading states on every AI call (styled per §9.10 empty & loading states).
 
 ### 4.1 Mobile-first behaviour (demo videos are recorded on a phone)
@@ -138,7 +138,7 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
 ## 5. Tech stack
 
 - **App:** Next.js 14+ (App Router) + TypeScript + Tailwind. Screens and API routes in one project.
-- **Animation:** CSS transforms/opacity first; `framer-motion` for the door entrance, page transitions and avatar/treehouse previews. No video, no 3D.
+- **Animation:** CSS transforms/opacity first; `framer-motion` for the door entrance, page transitions and avatar previews. No video, no 3D.
 - **Hosting:** Vercel, auto-deploy on push to GitHub `main`.
 - **AI text + chat + listing writer + fallback vision:** Gemini via `@google/genai`. Default model `gemini-3.8-flash` via `GEMINI_MODEL` (SPEC-NOTE: `gemini-2.5-flash` is no longer served to new API keys), with low thinking for ~5s answers; if it's overloaded, `GEMINI_FALLBACK_MODELS` (default `gemini-3.5-flash,gemini-3.5-flash-lite`) are tried in order.
 - **Proof-photo check:** Perceptron API (vision + OCR).
@@ -399,7 +399,7 @@ Use them with restraint: almond and cream give breathing room, browns anchor, gr
 - **Buttons feel tactile** — little wooden signs, illustrated labels, rounded storybook controls (`bark` fill / `cream` text for primary; `cream` with `bark` border for secondary).
 - Subtle borders, gentle shadows, layered illustrations for depth. No heavy glassmorphism, glossy gradients or heavy drop shadows.
 - Text over illustrations always sits on cream or translucent light panels for readability.
-- Build shared components: `WoodButton`, `CreamCard`, `LeafChip`, `SearchField`, `VineBorder`, `TreehouseScene`, `DoorTransition`, `TreehouseTile`, `HedgehogAvatar`, `AccessoryPicker`, `UniversityPicker`, `AccountTypeCard`, `AITag`, `EmptyState`.
+- Build shared components: `WoodButton`, `CreamCard`, `LeafChip`, `SearchField`, `VineBorder`, `TreehouseScene`, `DoorTransition`, `TreehouseTile`, `HedgehogAvatar`, `AccessoryPicker`, `UniversityPicker`, `AccountTypeCard`, `EmptyState`.
 
 ### 9.4 Animation principles
 
@@ -488,34 +488,20 @@ Forms stay readable: cream fields, walnut text, visible focus rings in the schoo
 - Selected state is obvious: border + slight lift + color change (and `aria-pressed`/radio semantics).
 - After selection, show that type's survey and fields.
 
-### 9.8 Business onboarding & treehouse personalization (`/onboarding/business`)
+### 9.8 Business onboarding (`/onboarding/business`)
 
-Flow: select Business → business info survey → choose category → **preview the category treehouse** → remaining details → confirm & save.
+Flow: select Business → one question per screen (name, category, what you offer, price range, building/area + availability) → tagline, bio and tags pre-filled by Gemini as plain editable text → confirm & save.
 
-The preview is prominent and **updates when the category changes**. Each category uses the **same base treehouse** with small, relevant differences so they still look like one family:
-
-| Category | Customization (use supplied assets where possible) |
-|---|---|
-| Beauty | Floral accents, soft decorative leaves, gentle pastel details |
-| Food | Small fruit, herb or food-inspired decorations |
-| Fitness | Energetic foliage or a small fitness sign |
-| Photography | Tiny camera detail or photography sign |
-| Tutoring | Books, a pencil, or a small learning detail |
-| Crafts | Handmade decorations, colorful details, craft objects |
-| Reselling | Small market sign, package or shop decoration |
-| Other | Default, unmodified treehouse |
-
-- Don't invent elaborate accessories or different building structures if the assets don't support them. If no decorative asset exists, use a subtle color variation, a small sign, or an existing illustration detail.
-- Implement as a **variant config** (`lib/treehouse-variants.ts`: `{ id, label, overlays[], tint?, signText? }`) so new categories are easy to add. "Other" = fallback.
-- The chosen variant is saved on the shop (`treehouseVariant`) and preserved when the profile is edited.
-- Keep it light: owners shouldn't configure lots of decorative settings.
+- **Category is a simple choice** — eight buttons (Beauty, Food, Fitness, Photography, Tutoring, Crafts, Reselling, Other). **No treehouse picture or category treehouse preview** anywhere in onboarding.
+- **Shop treehouse pictures are not shown** on the marketplace, storefront or seller dashboard (§9.10). The homepage treehouse and its door animation stay as they are.
+- `treehouseVariant` (= category) is still saved on the shop, and `lib/treehouse-variants.ts` + `TreehousePreview` + `public/assets/decorations/` are kept, unused, in case shop pictures come back.
 
 **As built (Phase 4):**
-- `/onboarding/business`: one question per screen — name → category → what you offer → price range → building/area + days & one time window → treehouse sign step with Gemini's pre-filled tagline, bio and tags shown as plain editable text ("Suggest different wording" asks again) → "Open my treehouse". The live `TreehousePreview` stays visible on every step (top on phones, left on desktop) and re-decorates the moment the category changes. Room numbers are rejected in the area field (client and server, `lib/privacy.ts`).
-- Decorations, placed in scene pixels on `treehouse-main` and kept small so all eight look like one family: **Fitness, Photography, Reselling use the team's art** (`decorations/fitness clipart.jpg`, `photography.png`, `reselling.jpg`, cut out to `decorations/cut/<category>.png` by `prepare-assets`); **Beauty (flower box), Food (fruit basket), Tutoring (book stack), Crafts (bunting + yarn) are still `PLACEHOLDER-ART` SVGs** until art arrives; Other has none.
+- `/onboarding/business`: a single cream card, one question per screen — name → category (8 buttons) → what you offer → price range → building/area + days & one time window → treehouse sign step with Gemini's pre-filled tagline, bio and tags shown as plain editable text ("Suggest different wording" asks again) → "Open my treehouse". Room numbers are rejected in the area field (client and server, `lib/privacy.ts`).
+- (Unused for now) category decorations for `TreehousePreview`: the team's art for Fitness, Photography and Reselling (cut out to `decorations/cut/<category>.png`), placeholder SVGs for Beauty, Food, Tutoring and Crafts.
 - After saving, the seller goes straight to `/seller/listings/new`: add 1–5 photos (shrunk to ≤1600px on the phone, uploaded straight to Cloudinary with signed params scoped to `treedorm/listings/<shopId>`), optional notes → Continue → Gemini pre-fills title, description, price, tags, 3–5 photo checkpoints and the custom-words toggle as plain editable fields → Publish or Save as draft. Publishing needs at least one checkpoint.
-- `/t/[shopSlug]`: treehouse variant, name, tagline, 🌳 Verified and ⭐ review counts, category · area · price range, listings grid, About (with a small buyer-facing "AI-assisted" label when the text started as a Gemini draft), When & where. Owners also see Add a listing / Seller dashboard.
-- `/seller`: treehouse summary and all listings (Live / Draft); drafts open in the same editor. The header shows "Your treehouse" for business accounts.
+- `/t/[shopSlug]`: see §9.10 (no treehouse picture, no AI label).
+- `/seller`: shop summary card (no picture) and all listings (Live / Draft); drafts open in the same editor. The header shows "Your treehouse" for business accounts.
 - SPEC-NOTE: not yet built — editing the treehouse after creation (`/seller/shop`, `PATCH /api/shops/[id]`), listing detail pages (Phase 7), embeddings on publish (Phase 6).
 
 ### 9.9 Personal onboarding & hedgehog avatar (`/onboarding/avatar`, `/profile/avatar`)
@@ -546,22 +532,22 @@ Should feel like you've successfully entered the woodland village — different 
 - **Background Almond `#EADDCA`** — a warm, softly lit woodland interior / parchment marketplace. Cream for cards, search and filter panels; Bark for headings and key controls; Leaf/Sage accents; Gold for subtle interactive highlights.
 - **Top decorative border (`VineBorder`):** vines and foliage along the top edge with organic curves and leaves, using the **watercolor vine** (`foliage/vine-branch.png`, §9.13) — repeat, flip and rotate copies along the top edge; the hedgehog-treehouse vines can fill gaps. Frames the page, never covers content. **The whole vine is always fully inside the screen on phone and desktop** — never cropped by the top or side edges, including mid-sway (mirror copies flip about their centre). Gentle sway only — the whole border must not keep waving. Simplify/reduce on small screens.
 - **Entrance:** arriving from the homepage plays the door entrance (§9.5). Don't replay it on filter changes, opening a listing, or returning from a result. Direct URL / existing session → immediate or very short transition.
-- **Search bar:** wide, rounded, cream background, clear search icon, inviting placeholder ("Find a treehouse — haircuts, cakes, grad photos…"), visible focus state, real submit. It's functional, not decorative. Next to it: the **Ask Tree Dorm AI** entry (§8.3), styled as part of the same world.
-- **Filters:** rounded scrollable category chips (same eight categories as onboarding), compact dropdowns or a collapsible panel (bottom sheet on mobile). Selected = leaf-green or bark fill with contrasting text. Decorative foliage never overlaps inputs, filters, names or controls.
-- **Results as small destinations in a woodland village**, not identical rectangular ecommerce cards: each `TreehouseTile` shows business name, category, a small treehouse illustration (its variant), short description, 🌳 Verified · ⭐ rating, and a clear "Enter" interaction. Keep the underlying layout consistent enough to scan and compare.
-- **Treehouse tile animation:** idle — subtle leaf sway or light movement; hover/focus — lifts or grows slightly, foliage moves, doorway becomes inviting; click — transitions toward an open-door / zoom into the storefront; reduced-motion — simple highlight/color change. Stagger and restrain idle motion when many are visible; never have every tile bouncing.
+- **Search bar:** wide, rounded, cream background, clear search icon, placeholder that always fits — "Search treehouses" on phones, "Find a treehouse — haircuts, cakes, grad photos…" from the `sm` breakpoint — visible focus state, real submit. Next to it: the **Ask Tree Dorm AI** entry (§8.3), styled as part of the same world.
+- **Filters:** rounded category chips (same eight as onboarding, plus "All"). On phones the **Filters** button (opens a bottom sheet with categories + sort) is a fixed first item with a divider, and the chips scroll horizontally in their own clipped row after it — **the button never covers a chip**. Desktop: chips wrap, Sort select at the end. Selected = leaf-green fill. Decorative foliage never overlaps inputs, filters, names or controls.
+- **Results are clean cream cards, easy to scan:** each `TreehouseTile` shows only the shop name, category, short description, 🌳 Verified · ⭐ rating and an "Enter" button. **No treehouse picture.**
+- **Tile interaction:** the whole card is one link; hover/focus lifts it slightly on desktop; tapping opens the storefront (plain navigation, no zoom). No idle motion.
 - **Rebook strip** sits below search when the buyer has due rebooks (§10).
 - **Empty & loading states** with a woodland creature (§9.15): initial loading, search in progress, no matching results, no filters selected, filtered results. Never delay access to results with animation.
 
 **As built (Phase 5):**
-- `/market`: `AppHeader` → the full `VineBorder` (every leaf inside the screen) → "The {school} village" heading → a big cream search bar (debounced as you type, plus a Search button) → scrollable category chips with "All" → Sort (Most verified / Top rated / Newest) on desktop, a **Filters** bottom sheet (categories + sort) on phones → results count → tiles.
+- `/market`: `AppHeader` → the full `VineBorder` (every leaf inside the screen) → "The {school} village" heading → a big cream search bar (debounced as you type, plus a Search button) → phones: [Filters] | scrolling category chips; desktop: chips + Sort (Most verified / Top rated / Newest) → results count → tiles.
 - Only the signed-in student's school: `GET /api/shops?q=&category=&sort=` and the page both use `session.schoolDomain` and ignore any `school` param. Search matches shop name, tagline, bio, tags and the titles/tags of live listings; every word must match.
 - Filters live in the URL (`router.replace`, no reload), so Back from a storefront restores them. The door entrance only plays from the homepage (`EntranceGlow` is triggered there); filter changes and Back show results immediately.
-- `TreehouseTile`: category treehouse, name, category chip, tagline, "🌳 N Verified · ⭐ 4.9" (or "New"), and an Enter button. The whole card is one stretched link; hover lifts it on desktop; tapping zooms the little treehouse into its door (~0.55s) and the warm light carries into the storefront. Reduced motion: a short fade.
+- `TreehouseTile`: name, category chip, tagline, "🌳 N Verified · ⭐ 4.9" (or "New"), Enter — a cream card with no image. The whole card is one stretched link (the pressed animation sits on an inner span so the link never transforms); hover lifts it on desktop.
 - States: searching → a small resting deer + "Searching…" and skeleton tiles; no results → rabbit, "No treehouses match", "Clear search and filters"; no treehouses at the school at all → squirrel, "No treehouses at {school} yet", "Open the first one". Creatures sit openly, small, on grass.
 - SPEC-NOTE: the Ask Tree Dorm AI entry (Phase 6) and the rebook strip (Phase 9) are not on the page yet.
 
-**Storefront (`/t/[shopSlug]`):** the business's personalized treehouse identity (variant) at the top with matching woodland details, then stats, listings, about, availability. Entering it from a tile uses the lighter door/zoom transition.
+**Storefront (`/t/[shopSlug]`):** starts with the shop name and info (cream card: name, tagline, 🌳 Verified and ⭐ reviews, category · area · price range; owners also get Add a listing / Seller dashboard), then **Listings with their photos**, then About and When & where. **No treehouse picture and no AI label.**
 
 ### 9.11 Page-to-page consistency
 
@@ -569,11 +555,11 @@ Should feel like you've successfully entered the woodland village — different 
 |---|---|
 | Homepage | Close-up treehouse illustration + cinematic entrance |
 | Signup / login | Calm Almond background (soft texture, a few leaves, whole vine at top) + university accent colors; no characters |
-| Account creation | Carmel background with soft texture and leaves, cream form surfaces, hedgehog / treehouse previews |
+| Account creation | Carmel background with soft texture and leaves, cream form surfaces, hedgehog / treehouse card images |
 | Personal profile customization | Default woodland hedgehog + accessory selection |
-| Business onboarding | Category-specific treehouse preview |
+| Business onboarding | Carmel background, one cream question card; category is a simple choice (no treehouse preview) |
 | Marketplace search / filter | Almond background, vines, foliage, organized search controls |
-| Storefront | Personalized treehouse identity + matching woodland details |
+| Storefront | Shop name and info card first, then listing photos; no treehouse picture |
 | Orders, chat, checkout, seller dashboard | Almond/cream surfaces, same buttons, chips, borders and fonts; light leaf accents only |
 
 Same typography, button styles, borders, icon language and animation principles everywhere — shared components and tokens, not pages designed independently.
@@ -625,11 +611,11 @@ Starting inventory (from the images supplied with this spec):
 **Homepage** — main treehouse image used, framed close with less sky; door-opening + enter-the-treehouse animation; marketplace and business-signup clearly reachable.
 **Signup/login** — calm Almond background with texture and a few leaves; whole vine visible on phone and desktop; no characters; no school pill — university shown only via accent colors and the picker; UW uses purple/gold accents; no impersonation of an official university page.
 **Account creation** — Personal and Business distinct and selectable; correct onboarding after selection; Carmel textured background; default avatar matches the supplied hedgehog; optional hats/sunglasses; skippable and editable later.
-**Business** — all 8 categories; restrained variant each; "Other" = default; preview updates live.
-**Marketplace** — Almond background; vines/foliage at top with subtle motion; themed search and filters; listings keep a treehouse identity; door entrance reused only for the right navigation.
+**Business** — all 8 categories as a simple choice; no treehouse preview; Gemini pre-fills shown as plain editable text with no AI labels.
+**Marketplace** — Almond background; full vine at top; cream search with a placeholder that fits on phones; Filters button never covering chips; clean cream tiles with no treehouse picture; door entrance only from the homepage. **Storefront** — name and info first, then listing photos; no treehouse picture.
 **Global** — Bloom Spring for big headings only, National Park for all other text (verified loading on every page); no eyebrow text anywhere; every avatar is the hedgehog; creatures still, small, sitting openly and grounded — never peeking, perching or half-hidden (≤2 on screen); no woodland spirits/sprites; mood references not shipped; supplied assets used (no unrelated replacements); consistent identity across pages; smooth, non-blocking animation; works on phone and desktop; reduced motion respected; text, forms and controls accessible.
 
-**Scope boundary:** this section is visual and frontend interaction. Don't rewrite backend, auth, database or API design to achieve it. Doors, account-type selection, university theming, avatar accessories and treehouse previews must actually work — not static mockups.
+**Scope boundary:** this section is visual and frontend interaction. Don't rewrite backend, auth, database or API design to achieve it. Doors, account-type selection, university theming and avatar accessories must actually work — not static mockups.
 
 
 ### 9.15 Woodland creatures (ambient decoration)
@@ -672,7 +658,7 @@ getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
 - `.edu` only + one-time code; rate-limit OTP (5/hour per email, 20/hour per IP).
 - Room numbers and contact details only in private chat; public pages show building/area only.
 - Proof photos deleted from Cloudinary when the order settles; listing photos kept.
-- Sellers edit everything the AI writes before it is saved; buyer-facing AI text can carry a small "AI-assisted" label (see §4 content rules).
+- Sellers edit everything Gemini pre-fills before it is saved. No AI labels are shown anywhere (§4).
 - Check result screen shows *why* (reasons list) and the confidence, and links to `/trust`.
 - Mismatch → buyer decides. AI never refunds or cancels on its own.
 - Every money action in `audit_log`.
@@ -695,7 +681,7 @@ getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
   6. "CSE 142 Help" — tutoring, $15–25
   7. "Knot & Needle" — handmade crochet, Crafts, $10–35
   8. "Dorm Drop Resale" — thrifted clothes and textbooks, Reselling, $5–40
-- Each shop has its category `treehouseVariant`; demo buyers have avatars (one default hedgehog, one with sunglasses + hat).
+- Each shop stores its category `treehouseVariant` (not currently displayed); demo buyers have avatars (one default hedgehog, one with sunglasses + hat).
 - 2–3 listings each with placeholder photos (upload a few royalty-free images to Cloudinary in the script, or use stable Unsplash URLs for seed only).
 - A mix of Verified counts and reviews so pages look alive.
 - Past orders for the demo buyer, including one haircut 30 days ago (rebook demo).
@@ -725,8 +711,8 @@ app/
   api/... (see §7)
 components/
   woodland/  (WoodButton, CreamCard, LeafChip, SearchField, VineBorder, TreehouseScene,
-              DoorTransition, TreehouseTile, TreehousePreview, HedgehogAvatar, AccessoryPicker,
-              UniversityPicker, AccountTypeCard, EmptyState, AITag)
+              DoorTransition, TreehouseTile, HedgehogAvatar, AccessoryPicker,
+              UniversityPicker, AccountTypeCard, EmptyState)
   app/       (MatchCard, StatBadge, ChatBox, PhotoUploader, SlotPicker, CheckResult, TabBar, BottomSheet)
 lib/
   db.ts, session.ts, schools.ts, treehouse-variants.ts, stripe.ts, cloudinary.ts, memory.ts,
@@ -798,8 +784,8 @@ Survey, `HedgehogAvatar`, `AccessoryPicker` with aligned hats/sunglasses, skip, 
 ✅ Accessories sit correctly on the head/face; skip works; avatar shows in header and can be changed later.
 
 **Phase 4 — Business onboarding + shops & listings** (§9.8)
-Survey with live category treehouse preview (8 variants), Gemini Shop Builder, Cloudinary uploads, Listing Writer, storefront page with stats.
-✅ A new business goes from signup to a published treehouse with one AI-written listing in under 2 minutes; preview changes with category.
+Survey (category as a simple choice), Gemini Shop Builder, Cloudinary uploads, Listing Writer, storefront page with stats.
+✅ A new business goes from signup to a published treehouse with one Gemini-pre-filled listing in under 2 minutes.
 
 **Phase 5 — Seed + marketplace** (§9.10)
 Seed script, Almond `/market` with `VineBorder`, search, category chips/filter sheet, `TreehouseTile`s with animations, storefront entry transition, empty/loading states.
@@ -830,7 +816,7 @@ VEYZL on PRs, fix findings, fill `AUDIT.md`, `CREDITS.md` complete, README with 
 
 Record on a real iPhone with the app installed to the home screen (full-screen, no browser bar), using iOS screen recording. Use two phones (buyer and seller) for the chat and booking parts if possible.
 
-1. Open the app → close-up treehouse → tap **"Open your treehouse"** → pick UW (page turns purple/gold, woodland stays) → code → **Business** on Carmel → choose Food and watch the treehouse preview change → AI writes the bio → upload cake photos → AI writes the listing.
+1. Open the app → close-up treehouse → tap **"Open your treehouse"** → pick UW (page turns purple/gold, woodland stays) → code → **Business** on Carmel → choose Food → the bio arrives pre-filled → upload cake photos → the listing arrives pre-filled.
 2. Switch to the demo buyer → tap the **door** → it opens and you're carried inside to the Almond village with vines → hedgehog-in-sunglasses avatar in the header → "Rebook Fade Lab?" strip → ask AI "I need a birthday cake that says Happy Birthday Maya by Friday" → top 3 with reasons.
 3. Tap Sweet Dorm Bakes' treehouse → enter the storefront → book → Stripe test card → hold placed → quick chat ("I'm in McMahon 712").
 4. Snap proof photo of a matching cake → Perceptron reads the text → ✅ pass → payment captured, Verified 13 → 14.

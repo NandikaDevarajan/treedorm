@@ -69,7 +69,6 @@ export async function POST(req: Request) {
     customTextAllowed: draft.customTextAllowed,
     tags: [...new Set(draft.tags)],
     active: false,
-    aiAssisted: result.ai,
     createdAt: new Date(),
   };
   const { listings } = await collections();

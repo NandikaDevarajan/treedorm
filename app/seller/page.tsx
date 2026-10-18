@@ -6,7 +6,6 @@ import { ShopStats } from "@/components/shop/ShopStats";
 import { CreamCard } from "@/components/woodland/CreamCard";
 import { EmptyState } from "@/components/woodland/EmptyState";
 import { LeafyBackground } from "@/components/woodland/LeafyBackground";
-import { TreehousePreview } from "@/components/woodland/TreehousePreview";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { collections } from "@/lib/collections";
 import { formatCents } from "@/lib/money";
@@ -27,13 +26,8 @@ export default async function SellerPage() {
     <LeafyBackground tone="almond">
       <AppHeader />
       <main className="mx-auto flex max-w-3xl flex-col gap-5 px-safe py-8">
-        <CreamCard className="grid gap-4 overflow-hidden p-0 sm:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          <TreehousePreview
-            variant={shop.treehouseVariant}
-            label={`${shop.name}'s treehouse`}
-            sizes="320px"
-          />
-          <div className="flex flex-col gap-2 p-5 sm:pl-0">
+        <CreamCard className="p-0">
+          <div className="flex flex-col gap-2 p-5 sm:p-6">
             <h1 className="font-display text-4xl leading-tight text-bark">{shop.name}</h1>
             <p className="text-walnut/85">{shop.tagline}</p>
             <ShopStats stats={shop.stats} />

@@ -5,7 +5,6 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { inputClass, textareaClass } from "@/components/seller/field";
 import { TagEditor } from "@/components/seller/TagEditor";
 import { LeafChip } from "@/components/woodland/LeafChip";
-import { TreehousePreview } from "@/components/woodland/TreehousePreview";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { DAYS, formatTime } from "@/lib/availability";
 import { CATEGORIES, type CategoryId } from "@/lib/categories";
@@ -29,11 +28,11 @@ const TIMES = Array.from({ length: 33 }, (_, i) => {
 });
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
-type Draft = { tagline: string; bio: string; tags: string[]; ai: boolean };
+type Draft = { tagline: string; bio: string; tags: string[] };
 
 /**
- * Business survey (SPEC §3.1 step 4, §9.8): one question per screen, with the category treehouse
- * preview always visible and updating live; then the Gemini draft to review and edit.
+ * Business survey (SPEC §3.1 step 4, §9.8): one question per screen; category is a simple choice.
+ * The last step shows Gemini's pre-filled tagline, bio and tags as plain editable text.
  */
 export function BusinessSurvey({ cancelHref }: { cancelHref?: string }) {
   const router = useRouter();
@@ -82,7 +81,6 @@ export function BusinessSurvey({ cancelHref }: { cancelHref?: string }) {
         tagline: res.draft.tagline,
         bio: res.draft.bio.slice(0, 300),
         tags: res.draft.tags,
-        ai: res.ai,
       });
     } catch (err) {
       setError((err as Error).message);
@@ -137,7 +135,6 @@ export function BusinessSurvey({ cancelHref }: { cancelHref?: string }) {
         tagline: draft.tagline,
         bio: draft.bio,
         tags: draft.tags,
-        aiAssisted: draft.ai,
       });
       router.push(res.next);
       router.refresh();
@@ -329,29 +326,13 @@ export function BusinessSurvey({ cancelHref }: { cancelHref?: string }) {
     },
   ];
   const current = steps[step];
-  const label = CATEGORIES.find((c) => c.id === category)?.label;
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:grid-cols-2 md:items-start md:gap-10 md:px-8 md:py-10">
-      {/* Live preview: always visible, changes with the category. */}
-      <section aria-label="Treehouse preview" className="flex flex-col gap-2 md:sticky md:top-10">
-        <TreehousePreview
-          variant={category}
-          className="rounded-b-[2rem] shadow-soft md:rounded-[2rem] md:border-4 md:border-cream"
-          priority
-        />
-        <div className="px-safe text-center md:px-0">
-          <p className="font-display text-3xl leading-tight text-bark">{name.trim() || "Your treehouse"}</p>
-          <p aria-live="polite" className="text-sm font-semibold text-walnut/80">
-            {label ? `${label} treehouse` : "Pick a category to decorate it"}
-          </p>
-        </div>
-      </section>
-
+    <div className="mx-auto w-full max-w-xl px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pt-12">
       <form
         onSubmit={next}
         noValidate
-        className="mx-4 flex flex-col gap-6 rounded-[2rem] bg-cream p-6 shadow-soft sm:p-8 md:mx-0"
+        className="flex flex-col gap-6 rounded-[2rem] bg-cream p-6 shadow-soft sm:p-8"
       >
         <div
           className="flex gap-1.5"

@@ -44,6 +44,15 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
   const [searching, setSearching] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const firstRun = useRef(true);
+  // Short search placeholder on phones so it always fits; the longer hint from the sm breakpoint up.
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const update = () => setWide(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   // Fetch whenever the query changes (debounced for typing); skip the server-rendered first pass.
   useEffect(() => {
@@ -118,7 +127,7 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
           enterKeyHint="search"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Haircuts, cakes, grad photos…"
+          placeholder={wide ? "Find a treehouse — haircuts, cakes, grad photos…" : "Search treehouses"}
           className="min-h-14 w-full rounded-full border-2 border-bark/25 bg-cream pr-28 pl-14 text-lg text-walnut shadow-soft placeholder:text-walnut/55 focus:border-accent focus:outline-none sm:min-h-16"
         />
         <button
@@ -129,11 +138,24 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
         </button>
       </form>
 
+      {/* Phones: Filters is a fixed first item; the chips scroll in their own clipped row after it,
+          so the button can never cover a chip. Desktop: chips, then Sort. */}
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border-2 border-bark/30 bg-cream px-4 font-bold text-bark md:hidden"
+        >
+          <svg aria-hidden viewBox="0 0 24 24" className="size-5 fill-none stroke-current stroke-2">
+            <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
+          </svg>
+          Filters
+        </button>
+        <span aria-hidden className="h-8 w-px shrink-0 bg-bark/20 md:hidden" />
         <div
           role="group"
           aria-label="Categories"
-          className="-mx-4 flex flex-1 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0"
+          className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-0.5 [mask-image:linear-gradient(to_right,black_85%,transparent)] [scrollbar-width:none] md:flex-wrap md:overflow-visible md:[mask-image:none]"
         >
           <LeafChip selected={!query.category} onClick={() => setCategory(undefined)}>
             All
@@ -147,17 +169,9 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
               {c.label}
             </LeafChip>
           ))}
+          {/* Room to scroll the last chip clear of the fade. */}
+          <span aria-hidden className="w-6 shrink-0 md:hidden" />
         </div>
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border-2 border-bark/30 bg-cream px-4 font-bold text-bark md:hidden"
-        >
-          <svg aria-hidden viewBox="0 0 24 24" className="size-5 fill-none stroke-current stroke-2">
-            <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
-          </svg>
-          Filters
-        </button>
         <label className="hidden shrink-0 items-center gap-2 text-sm font-semibold md:flex">
           Sort
           <select
@@ -193,21 +207,19 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
       {searching ? (
         <ul aria-hidden className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: Math.max(3, Math.min(shops.length, 6)) }, (_, i) => (
-            <li key={i} className="overflow-hidden rounded-card border border-bark/10 bg-cream">
-              <div className="aspect-[420/300] animate-pulse bg-almond" />
-              <div className="flex flex-col gap-2 p-4">
-                <div className="h-7 w-2/3 animate-pulse rounded-lg bg-almond" />
-                <div className="h-4 w-full animate-pulse rounded-lg bg-almond" />
-                <div className="h-11 w-1/3 self-end animate-pulse rounded-2xl bg-almond" />
-              </div>
+            <li key={i} className="flex flex-col gap-3 rounded-card border border-bark/10 bg-cream p-5">
+              <div className="h-8 w-2/3 animate-pulse rounded-lg bg-almond" />
+              <div className="h-4 w-full animate-pulse rounded-lg bg-almond" />
+              <div className="h-4 w-4/5 animate-pulse rounded-lg bg-almond" />
+              <div className="h-11 w-1/3 self-end animate-pulse rounded-2xl bg-almond" />
             </li>
           ))}
         </ul>
       ) : shops.length ? (
         <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {shops.map((s, i) => (
+          {shops.map((s) => (
             <li key={s.slug}>
-              <TreehouseTile shop={s} priority={i < 3} />
+              <TreehouseTile shop={s} />
             </li>
           ))}
         </ul>

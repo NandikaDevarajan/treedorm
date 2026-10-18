@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { AITag } from "../AITag";
 import { LeafChip } from "../LeafChip";
 import { SearchField } from "../SearchField";
 import { WoodButton } from "../WoodButton";
@@ -36,12 +35,5 @@ describe("SearchField", () => {
   it("is reachable by its label even when the label is visually hidden", () => {
     render(<SearchField label="Search treehouses" />);
     expect(screen.getByRole("searchbox", { name: "Search treehouses" })).toBeInTheDocument();
-  });
-});
-
-describe("AITag", () => {
-  it("labels AI content", () => {
-    render(<AITag />);
-    expect(screen.getByText("AI")).toBeInTheDocument();
   });
 });

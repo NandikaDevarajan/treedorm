@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { BottomSheet } from "@/components/app/BottomSheet";
 import { TabBar } from "@/components/app/TabBar";
-import { AITag } from "@/components/woodland/AITag";
 import { CreamCard } from "@/components/woodland/CreamCard";
 import { Creature } from "@/components/woodland/Creature";
 import { EmptyState } from "@/components/woodland/EmptyState";
@@ -117,12 +116,11 @@ export function Styleguide() {
           </div>
         </Section>
 
-        <Section title="Cards & AI label">
+        <Section title="Cards">
           <div className="grid gap-4 sm:grid-cols-2">
             <CreamCard className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-display text-2xl text-bark">Fade Lab</h3>
-                <AITag />
               </div>
               <p className="text-walnut/80">
                 Clean fades and lineups in the Lander lounge. Booked 40+ times.

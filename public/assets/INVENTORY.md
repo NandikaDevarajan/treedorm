@@ -9,7 +9,7 @@ re-run. Next `<Image>` serves everything as WebP/AVIF at the requested size, so 
 | File | Kind | Size | Role |
 |---|---|---|---|
 | treehouse/treehouse-main.jpg | source | 740×636 | Cartoon cabin treehouse (red roof, arched door, ladder, big trunk, pines, clear sky). Homepage entrance scene; base for tiles / storefront / category variants. *Still to confirm with the team that this is "another treehouse image".* |
-| treehouse/treehouse-main.webp | derived | 740×636 | Web copy of the above — the homepage scene (`TreehouseScene`, cropped tight via `lib/treehouse-scene.ts`) |
+| treehouse/treehouse-main.webp | derived | 740×636 | Web copy of the above — the homepage scene (`TreehouseScene`, cropped tight via `lib/treehouse-scene.ts`) and the Business card on the account-type page. Not used for shops |
 | treehouse/door-panel.png | derived | 36×68 | Door panel at box (368, 318) of treehouse-main with the railing painted out; swings open in the homepage entrance |
 | treehouse/door-railing.png | derived | 36×68 | Just the railing in front of the door (rest transparent); stays in front while the door swings |
 | treehouse/treehouse-hedgehog.webp | source | 800×436 | Line-art treehouse in a vine-covered oak, hedgehog at the roots. Storefront header alternative (later phase). **No longer behind signup/login** |
@@ -55,8 +55,8 @@ Mapping lives in `lib/creatures.ts` (`CREATURE_FOR`); change a placement there, 
 | decorations/fitness clipart.jpg | source (team) | Water bottle, shoe, dumbbell and stopwatch clipart on white. Cut out to `decorations/cut/fitness.png` |
 | decorations/photography.png | source (team) | Flat camera icon on white. Cut out to `decorations/cut/photography.png` |
 | decorations/reselling.jpg | source (team) | Online-shopping scene (person, laptop, coins) on white. Cut out to `decorations/cut/reselling.png` |
-| decorations/cut/fitness.png, photography.png, reselling.png | derived | `prepare-assets` cut-outs; the Fitness, Photography and Reselling treehouse decorations (small, on the left balcony rail) on previews, tiles and storefronts |
-| decorations/flower-box.svg, food-basket.svg, books.svg, bunting.svg, yarn.svg | placeholder | `PLACEHOLDER-ART` for categories still without team art: Beauty (flower box), Food (fruit basket), Tutoring (books), Crafts (bunting + yarn). Other has no decoration |
+| decorations/cut/fitness.png, photography.png, reselling.png | derived | `prepare-assets` cut-outs for the Fitness, Photography and Reselling treehouse decorations. **Not currently shown** — shop treehouse pictures were removed from tiles, storefronts and onboarding (SPEC §9.8); kept for `TreehousePreview` in case they return |
+| decorations/flower-box.svg, food-basket.svg, books.svg, bunting.svg, yarn.svg | placeholder | `PLACEHOLDER-ART` for categories still without team art: Beauty (flower box), Food (fruit basket), Tutoring (books), Crafts (bunting + yarn). Other has no decoration. **Not currently shown** (see above) |
 
 ## Fonts
 | File | Role |

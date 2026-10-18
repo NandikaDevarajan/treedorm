@@ -77,7 +77,6 @@ export const shopCreateBody = z.object({
   tagline: z.string().trim().min(1, "Add a tagline.").max(80),
   bio: z.string().trim().min(1, "Add a short bio.").max(300, "Keep the bio under 300 characters."),
   tags: z.array(z.string().trim().toLowerCase().min(1).max(30)).max(8),
-  aiAssisted: z.boolean().default(false),
 });
 
 export const photoSchema = z.object({ url: z.string().url(), publicId: z.string().min(1).max(200) });

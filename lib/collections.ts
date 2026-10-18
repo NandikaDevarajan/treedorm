@@ -126,8 +126,6 @@ export interface ShopDoc {
   coverImage?: Photo;
   /** What the seller wrote they offer (survey), kept for the AI and editing. */
   offer: string;
-  /** True when the tagline/bio started as a Gemini draft (shown with a ✨ AI label, SPEC §4). */
-  aiAssisted: boolean;
   createdAt: Date;
 }
 
@@ -145,8 +143,6 @@ export interface ListingDoc {
   tags: string[];
   embedding?: number[];
   active: boolean;
-  /** True when the text started as a Gemini draft. */
-  aiAssisted: boolean;
   createdAt: Date;
   publishedAt?: Date;
 }

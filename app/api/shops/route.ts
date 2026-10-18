@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
   const parsed = await parseBody(req, shopCreateBody);
   if ("response" in parsed) return parsed.response;
-  const { survey, tagline, bio, tags, aiAssisted } = parsed.data;
+  const { survey, tagline, bio, tags } = parsed.data;
 
   const { shops, users } = await collections();
   const ownerId = new ObjectId(ctx.session.userId);
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
     availability: survey.availability as Availability[],
     stats: { aiVerified: 0, reviewCount: 0, ratingAvg: 0 },
     offer: survey.offer,
-    aiAssisted,
     createdAt: new Date(),
   };
 

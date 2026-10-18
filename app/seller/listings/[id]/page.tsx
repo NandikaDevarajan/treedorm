@@ -33,7 +33,6 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
               checkpoints: l.checkpoints,
               customTextAllowed: l.customTextAllowed,
               photos: l.photos,
-              aiAssisted: l.aiAssisted,
             }}
           />
         </div>

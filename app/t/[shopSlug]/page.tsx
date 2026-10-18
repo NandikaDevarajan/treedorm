@@ -3,11 +3,9 @@ import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/app/AppHeader";
 import { ListingCard } from "@/components/shop/ListingCard";
 import { ShopStats } from "@/components/shop/ShopStats";
-import { AITag } from "@/components/woodland/AITag";
 import { CreamCard } from "@/components/woodland/CreamCard";
 import { EmptyState } from "@/components/woodland/EmptyState";
 import { LeafyBackground } from "@/components/woodland/LeafyBackground";
-import { TreehousePreview } from "@/components/woodland/TreehousePreview";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { getSession } from "@/lib/auth";
 import { formatAvailability } from "@/lib/availability";
@@ -30,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: data ? `${data.shop.name} · Tree Dorm` : "Treehouse not found · Tree Dorm" };
 }
 
-/** Storefront (SPEC §3.1 step 7, §9.10): the shop's treehouse, stats, listings, about, availability. */
+/** Storefront (SPEC §3.1 step 7, §9.10): shop name and info, listings with photos, about, availability. */
 export default async function StorefrontPage({ params }: Props) {
   const data = await load((await params).shopSlug);
   if (!data) notFound();
@@ -42,32 +40,31 @@ export default async function StorefrontPage({ params }: Props) {
   return (
     <LeafyBackground tone="almond">
       <AppHeader />
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 pb-12 md:px-8 md:pt-8">
-        <section className="grid gap-5 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-center md:gap-8">
-          <TreehousePreview
-            variant={shop.treehouseVariant}
-            label={`${shop.name}'s treehouse`}
-            className="rounded-b-[2rem] shadow-soft md:rounded-[2rem] md:border-4 md:border-cream"
-            priority
-          />
-          <div className="flex flex-col gap-3 px-safe md:px-0">
-            <h1 className="font-display text-5xl leading-none text-bark">{shop.name}</h1>
-            <p className="text-lg text-walnut/90">{shop.tagline}</p>
-            <ShopStats stats={shop.stats} />
-            <p className="text-sm text-walnut/80">
-              {category} · {shop.area} · {formatCents(shop.priceRange.min * 100)}–
-              {formatCents(shop.priceRange.max * 100)}
-            </p>
-            {isOwner && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                <WoodButton href="/seller/listings/new">Add a listing</WoodButton>
-                <WoodButton href="/seller" variant="secondary">
-                  Seller dashboard
-                </WoodButton>
-              </div>
-            )}
-          </div>
-        </section>
+      <main className="mx-auto flex max-w-5xl flex-col gap-6 pt-6 pb-12 md:px-8 md:pt-8">
+        {/* Shop name and info first (SPEC §9.10): no treehouse picture on storefronts. */}
+        <CreamCard
+          as="section"
+          aria-labelledby="shop-name"
+          className="mx-4 flex flex-col gap-3 p-6 sm:p-8 md:mx-0"
+        >
+          <h1 id="shop-name" className="font-display text-5xl leading-none text-bark">
+            {shop.name}
+          </h1>
+          <p className="text-lg text-walnut/90">{shop.tagline}</p>
+          <ShopStats stats={shop.stats} />
+          <p className="text-sm text-walnut/80">
+            {category} · {shop.area} · {formatCents(shop.priceRange.min * 100)}–
+            {formatCents(shop.priceRange.max * 100)}
+          </p>
+          {isOwner && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              <WoodButton href="/seller/listings/new">Add a listing</WoodButton>
+              <WoodButton href="/seller" variant="secondary">
+                Seller dashboard
+              </WoodButton>
+            </div>
+          )}
+        </CreamCard>
 
         <section aria-labelledby="listings" className="flex flex-col gap-4 px-safe md:px-0">
           <h2 id="listings" className="font-display text-3xl text-bark">
@@ -96,7 +93,6 @@ export default async function StorefrontPage({ params }: Props) {
               <h2 id="about" className="font-display text-3xl text-bark">
                 About
               </h2>
-              {shop.aiAssisted && <AITag label="AI-assisted" />}
             </div>
             <p>{shop.bio}</p>
             {shop.tags.length > 0 && (
