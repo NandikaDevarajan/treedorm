@@ -142,6 +142,8 @@ export interface ListingDoc {
   customTextAllowed: boolean;
   tags: string[];
   embedding?: number[];
+  /** Hash of the embedded text + model (lib/ai/embeddings.ts); a mismatch means re-embed. */
+  embeddingKey?: string;
   active: boolean;
   createdAt: Date;
   publishedAt?: Date;

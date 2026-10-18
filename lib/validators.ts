@@ -95,3 +95,12 @@ export const listingUpdateBody = z.object({
   customTextAllowed: z.boolean(),
   publish: z.boolean().default(false),
 });
+
+/** Ask Tree Dorm: the last 6 chat turns, newest last (SPEC §8.3). */
+export const searchBody = z.object({
+  messages: z
+    .array(z.object({ role: z.enum(["user", "assistant"]), text: z.string().trim().min(1).max(500) }))
+    .min(1)
+    .max(6)
+    .refine((m) => m.at(-1)?.role === "user", "The last message must be the student's."),
+});

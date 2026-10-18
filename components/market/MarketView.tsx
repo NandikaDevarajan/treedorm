@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { BottomSheet } from "@/components/app/BottomSheet";
@@ -137,6 +138,22 @@ export function MarketView({ initial, initialQuery, schoolShort, schoolHasShops,
           Search
         </button>
       </form>
+
+      {/* Ask Tree Dorm entry (SPEC §9.10): describe the need instead of searching. */}
+      <Link
+        href={text.trim() ? `/ask?q=${encodeURIComponent(text.trim())}` : "/ask"}
+        className="flex min-h-14 items-center justify-between gap-3 rounded-card border-2 border-leaf/40 bg-cream px-4 py-3 shadow-soft hover:border-leaf"
+      >
+        <span className="flex flex-col">
+          <span className="font-bold text-bark">Not sure what to search?</span>
+          <span className="text-sm text-walnut/85">
+            Ask Tree Dorm — describe what you need in your own words.
+          </span>
+        </span>
+        <span aria-hidden className="shrink-0 rounded-full bg-leaf px-3 py-1.5 font-bold text-cream">
+          Ask →
+        </span>
+      </Link>
 
       {/* Phones: Filters is a fixed first item; the chips scroll in their own clipped row after it,
           so the button can never cover a chip. Desktop: chips, then Sort. */}

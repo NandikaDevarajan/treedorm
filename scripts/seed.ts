@@ -12,6 +12,7 @@ import { rolesFor } from "@/lib/auth";
 import { DEFAULT_AVATAR } from "@/lib/avatar";
 import { collections } from "@/lib/collections";
 import { closeDb } from "@/lib/db";
+import { refreshListingEmbeddings } from "@/lib/listing-embeddings";
 import { SEED_SCHOOLS } from "@/lib/schools";
 import { SEED_BUYERS, SEED_ORDERS, SEED_SHOPS } from "./seed-data";
 
@@ -133,6 +134,19 @@ async function main() {
     await listings.deleteMany({ shopId: shop!._id, title: { $nin: s.listings.map((l) => l.title) } });
   }
   console.log(`✓ ${SEED_SHOPS.length} treehouses, ${listingCount} listings`);
+
+  // Search embeddings for every live listing (seeded or not); unchanged ones are skipped.
+  const live = await listings.find({ active: true }).toArray();
+  const shopById = new Map((await shops.find({}).toArray()).map((s) => [s._id.toHexString(), s]));
+  const items = live.flatMap((listing) => {
+    const shop = shopById.get(listing.shopId.toHexString());
+    return shop ? [{ listing, shop }] : [];
+  });
+  const embedded = await refreshListingEmbeddings(items);
+  const missing = await listings.countDocuments({ active: true, embedding: { $exists: false } });
+  console.log(
+    `✓ embeddings: ${embedded} updated, ${items.length - embedded} already current, ${missing} missing`,
+  );
 
   // Past orders (settled), their reviews, and buyer memory for rebook reminders.
   for (const o of SEED_ORDERS) {

@@ -100,7 +100,7 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 | `/onboarding/avatar` | Hedgehog + hats + sunglasses, skippable (§9.9) |
 | `/onboarding/business` | Business survey (one question per screen) → editable tagline/bio/tags → confirm (§9.8) |
 | `/market` | **Marketplace search & filter** (§9.10): Almond background, vine border, search, category chips, Ask AI, Rebook strip, treehouse results (only the user's school) |
-| `/ask` | Full AI chat view with match cards |
+| `/ask` | Ask Tree Dorm chat: describe a need, get up to 3 shop match cards (§8.3) |
 | `/t/[shopSlug]` | **Storefront** — the business's treehouse |
 | `/t/[shopSlug]/[listingId]` | Listing detail + slot picker + Book |
 | `/checkout/[orderId]` | Stripe Payment Element (test card) |
@@ -310,7 +310,7 @@ Input: 1–5 listing photos + category + optional seller notes. Output:
 `checkpoints` must be things a photo can actually show (shape, color, count, text). These are shown to the seller for edit and later passed to the photo check.
 
 ### 8.3 Matchmaker / Ask Tree Dorm (Gemini)
-1. Embed the buyer's query (`text-embedding-004` or current Gemini embedding model).
+1. Embed the buyer's query (current Gemini embedding model — `gemini-embedding-001`; SPEC-NOTE: `text-embedding-004` isn't offered to this API key).
 2. Retrieve top ~15 listings at the buyer's school by cosine similarity (+ category filter if obvious).
 3. Send query + those 15 (title, description, tags, price, shop rating, aiVerified, availability) to Gemini → choose top 3 with a one-sentence `reason` each, and a short friendly reply.
 ```json
@@ -320,6 +320,12 @@ Input: 1–5 listing photos + category + optional seller notes. Output:
 4. If the query is vague, return `{ "reply": "<one clarifying question>", "matches": [] }`.
 5. Use buyer memory (§10) to slightly prefer shops they've rated well before.
 Chat keeps the last 6 turns in client state and sends them each call.
+
+**As built (Phase 6):**
+- **Embeddings** (`lib/ai/embeddings.ts`, `lib/listing-embeddings.ts`): `gemini-embedding-001` (`GEMINI_EMBEDDING_MODEL`), 768 dims, normalised. The embedded text is title + description + listing and shop tags + shop name/category. `embeddingKey` (hash of text + model) skips unchanged listings. Computed on publish (`PATCH /api/listings/[id]`, never blocks publishing), for every live listing in `npm run seed`, and backfilled on the fly by the Matchmaker for any live listing still missing one.
+- **Matchmaker** (`lib/ai/matchmaker.ts`, `POST /api/search` `{ messages }`, last ≤6 turns, newest from the student): embeds the student's last ≤3 messages together (so a follow-up like "Saturday" keeps its context), cosine-ranks the live listings at **`session.schoolDomain` only** (any `school` field is ignored), +0.03 for shops the buyer reviewed ≥4★, top 15 → Gemini with refs `L1…L15` (it can't invent IDs) plus today's date for "Saturday"/"tomorrow". Gemini returns `{ reply, clarify, matches: [{ ref, reason }] }`: up to 3 listings from **different shops** (direct fits first, then shops that clearly help with the same occasion; never unrelated ones), or one clarifying question ending in "?" when the request names no kind of item or service. Nothing fits → a kind "no treehouse offers that yet". Gemini failure → the 3 closest shops with a factual one-liner. Rate limit 60/hour per student.
+- **`/ask`** (`components/ask/AskChat.tsx`): heading "Ask Tree Dorm", four suggestion buttons, chat bubbles (the student's with their hedgehog badge), "Looking around the village…" with the small resting deer while waiting, `MatchCard`s — clean cream cards with the listing photo, rank, shop name, price, listing title · category, the reason, 🌳 Verified · ⭐ rating and Enter (whole card opens the storefront). Errors show "Try again". `?q=` asks immediately. No AI labels.
+- **Entry on `/market`:** a cream card under the search bar — "Not sure what to search? Ask Tree Dorm — describe what you need in your own words." → `/ask?q=<whatever is in the search box>`.
 
 ### 8.4 Proof-photo check (Perceptron, Gemini fallback)
 Interface in `lib/vision/index.ts`:
@@ -502,7 +508,7 @@ Flow: select Business → one question per screen (name, category, what you offe
 - After saving, the seller goes straight to `/seller/listings/new`: add 1–5 photos (shrunk to ≤1600px on the phone, uploaded straight to Cloudinary with signed params scoped to `treedorm/listings/<shopId>`), optional notes → Continue → Gemini pre-fills title, description, price, tags, 3–5 photo checkpoints and the custom-words toggle as plain editable fields → Publish or Save as draft. Publishing needs at least one checkpoint.
 - `/t/[shopSlug]`: see §9.10 (no treehouse picture, no AI label).
 - `/seller`: shop summary card (no picture) and all listings (Live / Draft); drafts open in the same editor. The header shows "Your treehouse" for business accounts.
-- SPEC-NOTE: not yet built — editing the treehouse after creation (`/seller/shop`, `PATCH /api/shops/[id]`), listing detail pages (Phase 7), embeddings on publish (Phase 6).
+- SPEC-NOTE: not yet built — editing the treehouse after creation (`/seller/shop`, `PATCH /api/shops/[id]`), listing detail pages (Phase 7).
 
 ### 9.9 Personal onboarding & hedgehog avatar (`/onboarding/avatar`, `/profile/avatar`)
 
@@ -545,7 +551,7 @@ Should feel like you've successfully entered the woodland village — different 
 - Filters live in the URL (`router.replace`, no reload), so Back from a storefront restores them. The door entrance only plays from the homepage (`EntranceGlow` is triggered there); filter changes and Back show results immediately.
 - `TreehouseTile`: name, category chip, tagline, "🌳 N Verified · ⭐ 4.9" (or "New"), Enter — a cream card with no image. The whole card is one stretched link (the pressed animation sits on an inner span so the link never transforms); hover lifts it on desktop.
 - States: searching → a small resting deer + "Searching…" and skeleton tiles; no results → rabbit, "No treehouses match", "Clear search and filters"; no treehouses at the school at all → squirrel, "No treehouses at {school} yet", "Open the first one". Creatures sit openly, small, on grass.
-- SPEC-NOTE: the Ask Tree Dorm AI entry (Phase 6) and the rebook strip (Phase 9) are not on the page yet.
+- The Ask Tree Dorm entry sits under the search bar (§8.3 As built). SPEC-NOTE: the rebook strip (Phase 9) isn't on the page yet.
 
 **Storefront (`/t/[shopSlug]`):** starts with the shop name and info (cream card: name, tagline, 🌳 Verified and ⭐ reviews, category · area · price range; owners also get Add a listing / Seller dashboard), then **Listings with their photos**, then About and When & where. **No treehouse picture and no AI label.**
 
@@ -794,6 +800,7 @@ Seed script, Almond `/market` with `VineBorder`, search, category chips/filter s
 **Phase 6 — Ask Tree Dorm AI**
 Embeddings, Matchmaker route, chat UI with match cards styled in the woodland system.
 ✅ "I need someone to take my grad photos Saturday" returns Golden Hour Grads first with a sensible reason.
+SPEC-NOTE: VEYZL and `AUDIT.md` are skipped for now (by request), here and in Phase 10.
 
 **Phase 7 — Booking + payments + chat**
 Slot picker sheet, `POST /api/orders`, Stripe Payment Element, webhook, chat thread with polling.

@@ -1,12 +1,13 @@
 import { ObjectId } from "mongodb";
 import { apiError, parseBody } from "@/lib/api";
 import { collections } from "@/lib/collections";
+import { refreshListingEmbeddings } from "@/lib/listing-embeddings";
 import { getSellerContext } from "@/lib/seller";
 import { listingUpdateBody } from "@/lib/validators";
 
 /**
  * Seller edits a listing and optionally publishes it (SPEC §7 PATCH /api/listings/[id]).
- * SPEC-NOTE: "recompute embedding on publish" arrives with search embeddings in Phase 6.
+ * Publishing (re)computes the listing's search embedding (SPEC §7, §8.3).
  */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const ctx = await getSellerContext();
@@ -32,5 +33,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     { returnDocument: "after" },
   );
   if (!updated) return apiError(404, "not_found", "Listing not found.");
+  // Live listings are searchable by Ask Tree Dorm; a failed embed never blocks publishing.
+  if (updated.active) await refreshListingEmbeddings([{ listing: updated, shop: ctx.shop }]);
   return Response.json({ listing: { id, active: updated.active }, next: `/t/${ctx.shop.slug}` });
 }
