@@ -286,6 +286,17 @@ All routes: JSON in/out, `zod` validation, require session except `/api/auth/*`.
 - `GET /api/threads`, `GET /api/threads/[id]/messages?after=`, `POST /api/threads/[id]/messages` `{ body }` — client polls every 3s on open thread. Only the two participants can read.
 - `POST /api/reviews` `{ orderId, rating, body }` → only buyer, only once, only settled orders → update shop `reviewCount`/`ratingAvg`.
 
+
+**As built (Phase 7):**
+- **Slots** (`lib/slots.ts`): from the shop's weekly hours, next 14 days, in **Pacific time** (`America/Los_Angeles`; SPEC-NOTE: all seeded schools are Pacific). One slot per listing duration (30 min when none), with start times on the half-hour grid. Times overlapping a slot-holding order, or less than 2 hours away, come back `available: false` and are greyed out.
+- **Listing page** `/t/[shopSlug]/[listingId]`: photos, title, price, duration, description, shop stats, then **Book a time** — day chips + time grid (in a bottom sheet on phones, inline on desktop), "What should it say?" (≤80 chars) when `customTextAllowed`, the line "Your card is held, not charged, until your order is verified…", and a Book button that sticks above the tab bar on phones. Storefront listing cards link here. Owners and other schools can't book.
+- **`POST /api/orders`** (`lib/orders.ts createBooking`): re-checks the slot server-side, inserts the order with a unique `slotKey` (`shopId|startISO`) so two buyers can't take the same slot (409), creates the PaymentIntent (`capture_method: "manual"`, no `payment_method_types` — dynamic payment methods — `idempotencyKey: order-<id>`, metadata `orderId/shopId/listingId`), creates the thread and posts a system note with the booking (incl. custom words). Unpaid orders expire after **30 minutes** (slot freed, PaymentIntent canceled). SPEC-NOTE: raw PaymentIntent + Payment Element is kept (instead of Checkout Sessions) because capture happens later, after the photo check.
+- **`/checkout/[orderId]`** (buyer only): Payment Element in test mode, styled with the woodland tokens and National Park; "Your card is held, not charged, until your order is verified." `confirmPayment({ redirect: "if_required" })` → `/orders/[id]?held=1`.
+- **Webhook `/api/stripe/webhook`** (public in middleware, proves itself by signature): `constructEventAsync(rawBody, stripe-signature, STRIPE_WEBHOOK_SECRET)`; bad/missing signature → 400. `payment_intent.amount_capturable_updated` → `authorized` (+ chat note); `payment_intent.canceled` → `expired`/`canceled` and the slot is freed; `payment_intent.payment_failed` → logged. All updates are conditional, so replays are harmless. Opening an order or checkout also syncs a still-pending order from Stripe, so a missed webhook can't strand it.
+- **Chat**: one thread per order; `/messages` (other person's hedgehog, listing, last message, time) and `/messages/[threadId]` (both hedgehogs on bubbles, system notes centred, polls `?after=` every 3 s, skips while the tab is hidden; a reminder that room numbers and exact meeting spots belong here). Non-participants get "not found" from pages and APIs.
+- **Orders**: `/orders` groups **Needs a photo** (slot time passed or seller marked done), **Upcoming**, **Settled**; `/orders/[id]` for buyer or seller (status in plain words, hold explanation, chat link; buyer "Finish payment" while pending; seller **Service done** via `POST /api/orders/[id]/done`, allowed while `authorized` — SPEC-NOTE: also before the slot time so demos needn't wait). `/seller` lists **Bookings** (open, soonest first, with Chat / Service done) above the listings. The "Snap proof photo" box is a placeholder until Phase 8.
+- **Navigation**: phones get the bottom tab bar (Village · Ask · Orders · Messages · Profile, + Seller for businesses); desktop gets the same links in the header. `--tabbar-h` keeps sticky bottom bars above the tab bar.
+
 ---
 
 ## 8. AI features
@@ -805,6 +816,7 @@ SPEC-NOTE: VEYZL and `AUDIT.md` are skipped for now (by request), here and in Ph
 **Phase 7 — Booking + payments + chat**
 Slot picker sheet, `POST /api/orders`, Stripe Payment Element, webhook, chat thread with polling.
 ✅ Book with `4242 4242 4242 4242`; Stripe shows an uncaptured PaymentIntent; buyer and seller can chat.
+SPEC-NOTE: VEYZL/`AUDIT.md` skipped for now (by request).
 
 **Phase 8 — Proof check + release**
 Camera upload, VisionChecker (Gemini first, then Perceptron), `release-decision.ts` + tests, capture/partial/cancel, photo deletion, audit_log, reviews, Verified counter.

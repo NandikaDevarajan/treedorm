@@ -104,3 +104,12 @@ export const searchBody = z.object({
     .max(6)
     .refine((m) => m.at(-1)?.role === "user", "The last message must be the student's."),
 });
+
+/** Booking (SPEC §7 POST /api/orders). */
+export const orderCreateBody = z.object({
+  listingId: z.string().min(1),
+  slotStart: z.string().datetime({ offset: true }),
+  customText: z.string().trim().max(80, "Keep it under 80 characters.").optional(),
+});
+
+export const messageBody = z.object({ body: z.string().trim().min(1, "Write a message.").max(1000) });

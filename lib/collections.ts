@@ -77,6 +77,29 @@ export interface OrderDoc {
   settledAt?: Date;
   /** Set on seed data so re-running the seed updates instead of duplicating. */
   seedKey?: string;
+  /** `${shopId}|${slotStartISO}` while the order holds its slot; unique, so a slot can't be double-booked. */
+  slotKey?: string;
+  threadId?: ObjectId;
+}
+
+/** A private buyer–seller chat (SPEC §6). One per order. */
+export interface ThreadDoc {
+  _id: ObjectId;
+  orderId?: ObjectId;
+  buyerId: ObjectId;
+  sellerId: ObjectId;
+  lastMessageAt: Date;
+  lastMessage?: string;
+  createdAt: Date;
+}
+
+/** A chat message. `senderId: null` = a Tree Dorm system note (e.g. "booking confirmed"). */
+export interface MessageDoc {
+  _id: ObjectId;
+  threadId: ObjectId;
+  senderId: ObjectId | null;
+  body: string;
+  createdAt: Date;
 }
 
 export interface ReviewDoc {
@@ -168,6 +191,11 @@ export function ensureIndexes(): Promise<unknown> {
       db.collection("listings").createIndex({ shopId: 1 }),
       db.collection("orders").createIndex({ buyerId: 1 }),
       db.collection("orders").createIndex({ sellerId: 1 }),
+      db.collection("orders").createIndex({ slotKey: 1 }, { unique: true, sparse: true }),
+      db.collection("orders").createIndex({ shopId: 1, "slot.start": 1 }),
+      db.collection("threads").createIndex({ buyerId: 1, lastMessageAt: -1 }),
+      db.collection("threads").createIndex({ sellerId: 1, lastMessageAt: -1 }),
+      db.collection("messages").createIndex({ threadId: 1, createdAt: 1 }),
       db.collection("reviews").createIndex({ orderId: 1 }, { unique: true }),
       db.collection("buyer_memory").createIndex({ buyerId: 1 }, { unique: true }),
     ]);
@@ -189,6 +217,8 @@ export async function collections() {
     shops: db.collection<ShopDoc>("shops"),
     listings: db.collection<ListingDoc>("listings"),
     orders: db.collection<OrderDoc>("orders"),
+    threads: db.collection<ThreadDoc>("threads"),
+    messages: db.collection<MessageDoc>("messages"),
     reviews: db.collection<ReviewDoc>("reviews"),
     buyerMemory: db.collection<BuyerMemoryDoc>("buyer_memory"),
   };

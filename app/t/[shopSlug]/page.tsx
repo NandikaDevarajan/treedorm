@@ -74,7 +74,7 @@ export default async function StorefrontPage({ params }: Props) {
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((l) => (
                 <li key={l._id.toHexString()} className="flex">
-                  <ListingCard listing={l} />
+                  <ListingCard listing={l} href={`/t/${shop.slug}/${l._id.toHexString()}`} />
                 </li>
               ))}
             </ul>

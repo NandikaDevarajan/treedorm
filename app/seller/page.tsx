@@ -10,10 +10,13 @@ import { WoodButton } from "@/components/woodland/WoodButton";
 import { collections } from "@/lib/collections";
 import { formatCents } from "@/lib/money";
 import { getSellerContext } from "@/lib/seller";
+import { OrderCard } from "@/components/orders/OrderCard";
+import { ServiceDoneButton } from "@/components/orders/ServiceDoneButton";
+import { ordersFor } from "@/lib/order-views";
 
 export const metadata: Metadata = { title: "Seller dashboard · Tree Dorm" };
 
-/** Seller dashboard (SPEC §4): the treehouse at a glance and its listings. Bookings arrive in Phase 7. */
+/** Seller dashboard (SPEC §4): the treehouse at a glance, its bookings and its listings. */
 export default async function SellerPage() {
   const ctx = await getSellerContext();
   if (!ctx) redirect("/onboarding/account-type");
@@ -21,6 +24,14 @@ export default async function SellerPage() {
   const shop = ctx.shop;
   const { listings } = await collections();
   const items = await listings.find({ shopId: shop._id }).sort({ createdAt: -1 }).toArray();
+  // Bookings (SPEC §3.1 step 8): open ones first (soonest first), then a few finished ones.
+  const all = await ordersFor(ctx.session.userId, "seller");
+  const open = all
+    .filter((o) =>
+      ["pending_payment", "authorized", "service_done", "checking", "passed", "mismatch"].includes(o.status),
+    )
+    .sort((a, b) => a.slotStart.localeCompare(b.slotStart));
+  const recent = all.filter((o) => !open.includes(o)).slice(0, 5);
 
   return (
     <LeafyBackground tone="almond">
@@ -39,6 +50,50 @@ export default async function SellerPage() {
             </div>
           </div>
         </CreamCard>
+
+        <section aria-labelledby="bookings" className="flex flex-col gap-3">
+          <h2 id="bookings" className="font-display text-3xl text-bark">
+            Bookings
+          </h2>
+          {open.length ? (
+            <ul className="flex flex-col gap-3">
+              {open.map((o) => (
+                <li key={o.id}>
+                  <OrderCard
+                    order={o}
+                    viewer="seller"
+                    actions={
+                      <>
+                        {o.threadId && (
+                          <WoodButton href={`/messages/${o.threadId}`} variant="secondary">
+                            Chat
+                          </WoodButton>
+                        )}
+                        {o.status === "authorized" && <ServiceDoneButton orderId={o.id} />}
+                      </>
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-2xl bg-cream/70 px-4 py-3 text-walnut/80">No open bookings right now.</p>
+          )}
+          {recent.length > 0 && (
+            <details className="rounded-2xl bg-cream/70 px-4 py-2">
+              <summary className="min-h-11 cursor-pointer content-center font-semibold">
+                Recent finished bookings ({recent.length})
+              </summary>
+              <ul className="flex flex-col gap-3 py-2">
+                {recent.map((o) => (
+                  <li key={o.id}>
+                    <OrderCard order={o} viewer="seller" />
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </section>
 
         <section aria-labelledby="your-listings" className="flex flex-col gap-3">
           <h2 id="your-listings" className="font-display text-3xl text-bark">

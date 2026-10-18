@@ -30,7 +30,8 @@ export function TabBar({ isSeller = false, className }: { isSeller?: boolean; cl
 
   return (
     <nav
-      aria-label="Main"
+      aria-label="Tabs"
+      data-tabbar=""
       className={cn("border-t-2 border-bark/20 bg-cream/95 pb-safe backdrop-blur-sm", className)}
     >
       <ul className="mx-auto flex max-w-lg">

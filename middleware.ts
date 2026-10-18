@@ -5,8 +5,8 @@ import { homeFor, SESSION_COOKIE, verifySession } from "@/lib/session";
 const PUBLIC_PAGES = ["/", "/about", "/trust"];
 /** Sign-in pages: signed-in users are sent on to where they belong. */
 const AUTH_PAGES = ["/login", "/signup"];
-/** API routes that don't need a session (SPEC §7: /api/auth/*). */
-const PUBLIC_API = ["/api/auth/"];
+/** API routes that don't need a session (SPEC §7: /api/auth/*; Stripe's webhook proves itself by signature). */
+const PUBLIC_API = ["/api/auth/", "/api/stripe/webhook"];
 
 const matches = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || (p.endsWith("/") ? path.startsWith(p) : path.startsWith(`${p}/`)));

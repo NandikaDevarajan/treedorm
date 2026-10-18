@@ -176,7 +176,7 @@ export function AskChat({
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 border-t-2 border-bark/15 bg-cream/95 px-safe pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm"
+        className="sticky bottom-[var(--tabbar-h,0px)] border-t-2 border-bark/15 bg-cream/95 px-safe pt-3 pb-3 backdrop-blur-sm md:pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       >
         <div className="mx-auto flex max-w-3xl items-end gap-2">
           <label htmlFor="ask-input" className="sr-only">

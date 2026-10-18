@@ -69,6 +69,15 @@
   }
 }
 
+/* Phones: the bottom tab bar (SPEC §4) is fixed, so pages leave room for it and sticky bottom bars
+   (Book, chat input) sit above it via --tabbar-h. */
+@media (max-width: 767px) {
+  body:has([data-tabbar]) {
+    --tabbar-h: calc(3.5rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--tabbar-h);
+  }
+}
+
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);
 }
