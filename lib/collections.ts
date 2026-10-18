@@ -139,12 +139,6 @@ export interface AuditLogDoc {
   at: Date;
 }
 
-/** Mongo fallback for buyer memory (SPEC §10). */
-export interface BuyerMemoryDoc {
-  buyerId: ObjectId;
-  events: { type: "order_settled"; category: CategoryId; shopId: ObjectId; listingId: ObjectId; at: Date }[];
-}
-
 export interface Photo {
   url: string;
   publicId: string;
@@ -223,7 +217,6 @@ export function ensureIndexes(): Promise<unknown> {
       db.collection("threads").createIndex({ sellerId: 1, lastMessageAt: -1 }),
       db.collection("messages").createIndex({ threadId: 1, createdAt: 1 }),
       db.collection("reviews").createIndex({ orderId: 1 }, { unique: true }),
-      db.collection("buyer_memory").createIndex({ buyerId: 1 }, { unique: true }),
       db.collection("audit_log").createIndex({ orderId: 1, at: 1 }),
     ]);
   })().catch((err) => {
@@ -247,7 +240,6 @@ export async function collections() {
     threads: db.collection<ThreadDoc>("threads"),
     messages: db.collection<MessageDoc>("messages"),
     reviews: db.collection<ReviewDoc>("reviews"),
-    buyerMemory: db.collection<BuyerMemoryDoc>("buyer_memory"),
     auditLog: db.collection<AuditLogDoc>("audit_log"),
   };
 }

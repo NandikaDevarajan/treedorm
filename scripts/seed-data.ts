@@ -539,7 +539,7 @@ export const SEED_BUYERS = [
   },
 ] as const;
 
-/** Past orders. `daysAgo` sets when it settled; the Fade Lab haircut 30 days ago drives the rebook demo (§10). */
+/** Past orders. `daysAgo` sets when it settled. */
 export const SEED_ORDERS = [
   {
     key: "maya-fade",

@@ -30,8 +30,7 @@ async function audit(
 
 /**
  * After money moves (capture, partial capture or cancel): delete the proof photo from Cloudinary,
- * set settledAt, record the decision in audit_log and, on capture, add the visit to buyer memory
- * (for rebook reminders, SPEC §10).
+ * set settledAt and record the decision in audit_log.
  */
 async function settle(
   order: WithId<OrderDoc>,
@@ -42,7 +41,7 @@ async function settle(
     byUserId: ObjectId | null;
   },
 ) {
-  const { orders, shops, buyerMemory } = await collections();
+  const { orders } = await collections();
   const now = new Date();
   await orders.updateOne(
     { _id: order._id },
@@ -76,26 +75,6 @@ async function settle(
     },
     `${outcome.status}; captured ${outcome.capturedCents} of ${order.amountCents}; proof photo deleted`,
   );
-  if (outcome.capturedCents > 0) {
-    const shop = await shops.findOne({ _id: order.shopId }, { projection: { category: 1 } });
-    if (shop) {
-      await buyerMemory.updateOne(
-        { buyerId: order.buyerId },
-        {
-          $push: {
-            events: {
-              type: "order_settled",
-              category: shop.category,
-              shopId: order.shopId,
-              listingId: order.listingId,
-              at: now,
-            },
-          },
-        },
-        { upsert: true },
-      );
-    }
-  }
 }
 
 /**

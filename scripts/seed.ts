@@ -19,7 +19,7 @@ import { SEED_BUYERS, SEED_ORDERS, SEED_SHOPS } from "./seed-data";
 const DAY = 24 * 60 * 60 * 1000;
 
 async function main() {
-  const { schools, users, shops, listings, orders, reviews, buyerMemory } = await collections();
+  const { schools, users, shops, listings, orders, reviews } = await collections();
 
   for (const school of SEED_SCHOOLS) {
     await schools.updateOne({ domain: school.domain }, { $set: school }, { upsert: true });
@@ -148,7 +148,7 @@ async function main() {
     `✓ embeddings: ${embedded} updated, ${items.length - embedded} already current, ${missing} missing`,
   );
 
-  // Past orders (settled), their reviews, and buyer memory for rebook reminders.
+  // Past orders (settled) and their reviews.
   for (const o of SEED_ORDERS) {
     const buyerId = buyerIds.get(o.buyer)!;
     const shop = shopIds.get(o.shop)!;
@@ -200,22 +200,7 @@ async function main() {
       { upsert: true },
     );
   }
-  for (const [email, buyerId] of buyerIds) {
-    const events = SEED_ORDERS.filter((o) => o.buyer === email).map((o) => {
-      const shop = shopIds.get(o.shop)!;
-      return {
-        type: "order_settled" as const,
-        category: shop.category as never,
-        shopId: shop.shopId,
-        listingId: listingIds.get(`${o.shop}::${o.listing}`)!,
-        at: new Date(Date.now() - o.daysAgo * DAY),
-      };
-    });
-    await buyerMemory.updateOne({ buyerId }, { $set: { events } }, { upsert: true });
-  }
-  console.log(
-    `✓ ${SEED_ORDERS.length} past orders with reviews (Maya's Fade Lab haircut settled 30 days ago)`,
-  );
+  console.log(`✓ ${SEED_ORDERS.length} past orders with reviews`);
 }
 
 main()

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 /** The Photo check's verdict and its plain-language reasons (SPEC §11: always show why). */
@@ -31,6 +32,12 @@ export function CheckResult({
         ))}
       </ul>
       <p className="text-sm text-walnut/75">How sure the check is: {Math.round(check.confidence * 100)}%</p>
+      <Link
+        href="/trust"
+        className="min-h-11 content-center text-sm font-semibold text-bark underline underline-offset-4"
+      >
+        How the photo check works
+      </Link>
     </section>
   );
 }

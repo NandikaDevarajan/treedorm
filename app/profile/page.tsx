@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/app/AppHeader";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { SiteLinks } from "@/components/site/SiteLinks";
 import { CreamCard } from "@/components/woodland/CreamCard";
 import { HedgehogAvatar } from "@/components/woodland/HedgehogAvatar";
 import { LeafyBackground } from "@/components/woodland/LeafyBackground";
@@ -76,7 +77,8 @@ export default async function ProfilePage() {
           </CreamCard>
         )}
 
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <SiteLinks className="justify-center" />
           <LogoutButton />
         </div>
       </main>

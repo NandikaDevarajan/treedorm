@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { TreehouseScene, type EntrancePhase } from "@/components/home/TreehouseScene";
+import { SiteLinks } from "@/components/site/SiteLinks";
 import { LeafyBackground } from "@/components/woodland/LeafyBackground";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { cn } from "@/lib/cn";
@@ -98,6 +99,9 @@ export function HomeEntrance() {
               Sign up
             </Link>
           </p>
+          <footer>
+            <SiteLinks className="text-sm" />
+          </footer>
         </div>
       </main>
 

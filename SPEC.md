@@ -32,8 +32,7 @@ Built for **DubHacks '26** — Generative AI commerce track.
 | **Perceptron** | Proof-photo check uses Perceptron vision + OCR (e.g. reading cake text "Happy Birthday Maya") |
 | **VEYZL** | Public GitHub repo; VEYZL audits every PR. Keep the money-release logic in one small, well-tested file (`lib/release-decision.ts`) so the audit is meaningful. Keep a `AUDIT.md` log of findings and fixes |
 | **Gemini** | Shopping chat/search + listing writer from seller photos + shop onboarding |
-| **MongoDB Atlas** | Shops, listings, orders, payment status, messages, buyer memory |
-| **Backboard** | Buyer order memory for rebook reminders. Implement behind an interface; MongoDB fallback if no key |
+| **MongoDB Atlas** | Shops, listings, orders, payment status, messages |
 | **GoDaddy** | Custom domain pointed at Vercel (manual step, not code) |
 | **SideShift (Best Startup Idea)** | No build. Include `/about` page with business model (see §15) |
 | Best Freshman Beginner's Project, DubHacks NEXT, Commit Fellowship | No extra build |
@@ -80,9 +79,8 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
     - **Pass** → payment captured, seller's Verified count +1, buyer asked for a review.
     - **Mismatch** → buyer sees the reasons and chooses **Accept anyway**, **Partial refund**, or **Cancel**.
 11. Proof photo deleted after the order settles.
-12. Later, **rebook reminder** ("It's been 4 weeks since your haircut at Fade Lab — rebook?").
-13. Avatar can be changed any time from **Profile → Edit avatar**.
-14. **Switch to Business:** `/profile` shows "Open your treehouse" to Personal users. It runs the business onboarding (survey → save, with "Not now" back to the profile); saving makes the account Business (`roles: ["buyer","seller"]`) and keeps the hedgehog avatar, survey answers and everything a buyer can do.
+12. Avatar can be changed any time from **Profile → Edit avatar**.
+13. **Switch to Business:** `/profile` shows "Open your treehouse" to Personal users. It runs the business onboarding (survey → save, with "Not now" back to the profile); saving makes the account Business (`roles: ["buyer","seller"]`) and keeps the hedgehog avatar, survey answers and everything a buyer can do.
 
 > Note: the original notes said buyer pays after service. We **authorize at booking, capture after the check** — no money moves until verified, but the seller knows the buyer is good for it.
 
@@ -99,7 +97,7 @@ There are two account types (§9.7): **Personal** (buyer) and **Business** (sell
 | `/onboarding/personal` | Short survey → optional avatar step |
 | `/onboarding/avatar` | Hedgehog + hats + sunglasses, skippable (§9.9) |
 | `/onboarding/business` | Business survey (one question per screen) → editable tagline/bio/tags → confirm (§9.8) |
-| `/market` | **Marketplace search & filter** (§9.10): Almond background, vine border, search, category chips, Ask AI, Rebook strip, treehouse results (only the user's school) |
+| `/market` | **Marketplace search & filter** (§9.10): Almond background, vine border, search, category chips, Ask AI, treehouse results (only the user's school) |
 | `/ask` | Ask Tree Dorm chat: describe a need, get up to 3 shop match cards (§8.3) |
 | `/t/[shopSlug]` | **Storefront** — the business's treehouse |
 | `/t/[shopSlug]/[listingId]` | Listing detail + slot picker + Book |
@@ -145,12 +143,11 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
 - **Payments:** Stripe test mode (`stripe` server SDK only), **Stripe-hosted Checkout** (`checkout.stripe.com`, Stripe's default look) with `payment_intent_data.capture_method: "manual"` — the card is authorized at booking and captured after the photo check.
 - **Database:** MongoDB Atlas (`mongodb` driver, no ORM). Validate inputs with `zod`.
 - **Photos:** Cloudinary (`cloudinary`). Mongo stores URLs + public IDs only.
-- **Buyer memory:** Backboard (behind `lib/memory.ts`), Mongo fallback.
 - **Auth:** custom email OTP + signed session cookie (`jose`). The 6-digit code is sent by **real email via Resend** (`RESEND_API_KEY`) in the woodland style: cream card, the hedgehog (embedded inline), the code shown big and clear; subject **"Your Tree Dorm code"**. Without a key — or if a send fails outside production — the code is logged to the server console and shown in a dev-only toast. The dev-only demo login (§12) stays as a backup in case email is slow during the demo.
 - **Fonts:** `next/font/local` (Bloom Spring) and `next/font/google` (National Park), §9.3.
 - **Code + audit:** public GitHub repo, VEYZL runs on every PR.
 
-**Architecture rule:** phones only talk to our Next.js app. Only API routes call Gemini, Perceptron, Stripe, MongoDB, Cloudinary, Backboard. No API key is ever sent to the client except Stripe's publishable key.
+**Architecture rule:** phones only talk to our Next.js app. Only API routes call Gemini, Perceptron, Stripe, MongoDB, Cloudinary. No API key is ever sent to the client except Stripe's publishable key.
 
 ---
 
@@ -236,9 +233,6 @@ Build and test every screen at **390×844 (iPhone 14/15)** first, then tablet an
 // reviews
 { _id, orderId, shopId, buyerId, rating: 1|2|3|4|5, body: string, createdAt: Date }
 
-// buyer_memory  (Mongo fallback for Backboard)
-{ buyerId, events: { type: "order_settled", category, shopId, listingId, at: Date }[] }
-
 // audit_log  (every money decision)
 { orderId, actor: "ai"|"buyer"|"system", action, inputs: object, outcome, at: Date }
 ```
@@ -280,7 +274,6 @@ All routes: JSON in/out, `zod` validation, require session except `/api/auth/*`.
   - `cancel` → cancel PaymentIntent
   - Then delete proof photo from Cloudinary, write audit_log, set `settledAt`.
 - `GET /api/orders?role=buyer|seller` → list
-- `GET /api/orders?buyer=[id]&rebook=true` → past settled orders due for rebook (§10)
 
 ### Messages & reviews
 - `GET /api/threads`, `GET /api/threads/[id]/messages?after=`, `POST /api/threads/[id]/messages` `{ body }` — client polls every 3s on open thread. Only the two participants can read.
@@ -329,7 +322,6 @@ Input: 1–5 listing photos + category + optional seller notes. Output:
   "matches": [{ "listingId": "...", "reason": "Does outdoor grad shoots on campus, $40/hr, 12 Verified orders" }] }
 ```
 4. If the query is vague, return `{ "reply": "<one clarifying question>", "matches": [] }`.
-5. Use buyer memory (§10) to slightly prefer shops they've rated well before.
 Chat keeps the last 6 turns in client state and sends them each call.
 
 **As built (Phase 6):**
@@ -372,9 +364,9 @@ Tests in `lib/__tests__/release-decision.test.ts` (Vitest) covering: pass high-c
 - **Custom text** (`lib/text-match.ts`): matched in code from the checker's `ocrText` — case-insensitive, punctuation ignored, extra words around it allowed, at most 2 edits in total and at most 1 in short words (≤4 letters) so a different name ("Mia" for "Maya") doesn't pass. The text reason is written by us: "Text reads “Happy Birthday Maya” ✓" or "Expected the text “…”, photo reads “…” ✗".
 - **Release decision** (`lib/release-decision.ts`, pure): `decide()` → `auto_capture` only for verdict `pass`, confidence ≥ 0.80, custom text matched (when set) and ≥1 checkpoint; `ask_buyer` otherwise; `invalid` when the order isn't holding a payment. `resolveChoice()` → accept (capture full), partial (whole cents, > 0 and < total), cancel (release); only from `mismatch`; never more than authorized. Tests in `lib/__tests__/release-decision.test.ts` and `text-match.test.ts`.
 - **Flow**: `/orders/[id]` shows **Snap proof photo** to the buyer while `authorized` or `service_done` — `<input type="file" accept="image/*" capture="environment">` (camera on phones, file picker on desktop), shrunk to ≤1600 px, uploaded straight to Cloudinary (`POST /api/orders/[id]/proof-sign`, folder `treedorm/proofs/<orderId>`), then `POST /api/orders/[id]/check`. The order is claimed atomically (`checking`), so only one check runs. **Pass** → Stripe capture (`amount_to_capture` ≤ authorized, idempotency key), `captured`, `stats.aiVerified += 1`, chat note, and the page shows the fox sitting beside "Verified! Payment sent to [shop]" plus "Leave a review". **Mismatch/unsure** → `mismatch` with the reasons and how sure the check is, then **Accept anyway / Partial refund (amount input, "you get $x back") / Cancel** via `POST /api/orders/[id]/resolve` (locked with `settling` against double taps). Only an auto-pass adds to the Verified count.
-- **After settling**: proof photo deleted from Cloudinary, `proofPhoto` cleared, `settledAt` set, `resolution` saved, `audit_log` rows for the check and the money action (actor ai/buyer, provider, verdict, confidence, text match, authorized vs captured), buyer memory event added on capture (for rebooks, §10).
+- **After settling**: proof photo deleted from Cloudinary, `proofPhoto` cleared, `settledAt` set, `resolution` saved, `audit_log` rows for the check and the money action (actor ai/buyer, provider, verdict, confidence, text match, authorized vs captured).
 - **Reviews**: `/orders/[id]/review` (1–5 stars + optional note ≤500 chars) → `POST /api/reviews`; buyer only, once per order (unique index), only `captured`/`partially_refunded`; shop `reviewCount`/`ratingAvg` updated atomically.
-- Wording is "Photo check" everywhere, no AI labels. SPEC-NOTE: the link from the check result to `/trust` arrives with that page in Phase 9.
+- Wording is "Photo check" everywhere, no AI labels. The check result ends with a "How the photo check works" link to `/trust` (Phase 9).
 
 ---
 
@@ -562,7 +554,6 @@ Should feel like you've successfully entered the woodland village — different 
 - **Filters:** rounded category chips (same eight as onboarding, plus "All"). On phones the **Filters** button (opens a bottom sheet with categories + sort) is a fixed first item with a divider, and the chips scroll horizontally in their own clipped row after it — **the button never covers a chip**. Desktop: chips wrap, Sort select at the end. Selected = leaf-green fill. Decorative foliage never overlaps inputs, filters, names or controls.
 - **Results are clean cream cards, easy to scan:** each `TreehouseTile` shows only the shop name, category, short description, 🌳 Verified · ⭐ rating and an "Enter" button. **No treehouse picture.**
 - **Tile interaction:** the whole card is one link; hover/focus lifts it slightly on desktop; tapping opens the storefront (plain navigation, no zoom). No idle motion.
-- **Rebook strip** sits below search when the buyer has due rebooks (§10).
 - **Empty & loading states** with a woodland creature (§9.15): initial loading, search in progress, no matching results, no filters selected, filtered results. Never delay access to results with animation.
 
 **As built (Phase 5):**
@@ -571,7 +562,7 @@ Should feel like you've successfully entered the woodland village — different 
 - Filters live in the URL (`router.replace`, no reload), so Back from a storefront restores them. The door entrance only plays from the homepage (`EntranceGlow` is triggered there); filter changes and Back show results immediately.
 - `TreehouseTile`: name, category chip, tagline, "🌳 N Verified · ⭐ 4.9" (or "New"), Enter — a cream card with no image. The whole card is one stretched link (the pressed animation sits on an inner span so the link never transforms); hover lifts it on desktop.
 - States: searching → a small resting deer + "Searching…" and skeleton tiles; no results → rabbit, "No treehouses match", "Clear search and filters"; no treehouses at the school at all → squirrel, "No treehouses at {school} yet", "Open the first one". Creatures sit openly, small, on grass.
-- The Ask Tree Dorm entry sits under the search bar (§8.3 As built). SPEC-NOTE: the rebook strip (Phase 9) isn't on the page yet.
+- Under the search bar: the Ask Tree Dorm entry (§8.3 As built).
 
 **Storefront (`/t/[shopSlug]`):** starts with the shop name and info (cream card: name, tagline, 🌳 Verified and ⭐ reviews, category · area · price range; owners also get Add a listing / Seller dashboard), then **Listings with their photos**, then About and When & where. **No treehouse picture and no AI label.**
 
@@ -665,20 +656,6 @@ Painted forest scenes for vibe only: **sunlit forest, soft light rays, winding d
 
 ---
 
-## 10. Rebook reminders (Backboard)
-
-`lib/memory.ts`:
-```ts
-recordSettled(buyerId, { category, shopId, listingId, at })
-getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
-```
-- Backboard implementation when `BACKBOARD_API_KEY` exists (**read their docs first**); else Mongo `buyer_memory`.
-- Default cadences: Beauty (hair) 28 days, Beauty (nails) 21, Fitness 7, Tutoring 7, Food 14, Crafts / Reselling / Photography / Other — none.
-- Shown as a "Time to rebook?" strip on `/market`. One tap pre-fills the same listing.
-- Demo seed: one buyer with a haircut settled 30 days ago so the strip shows.
-
----
-
 ## 11. Trust & responsibility (15% of judging — make it visible)
 
 - `.edu` only + one-time code; rate-limit OTP (5/hour per email, 20/hour per IP).
@@ -686,12 +663,25 @@ getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
 - Proof photos deleted from Cloudinary when the order settles; listing photos kept.
 - Sellers edit everything Gemini pre-fills before it is saved. No AI labels are shown anywhere (§4).
 - Check result screen shows *why* (reasons list) and the confidence, and links to `/trust`.
-- Mismatch → buyer decides. AI never refunds or cancels on its own.
+- Mismatch → buyer decides. The check never refunds or cancels on its own.
 - Every money action in `audit_log`.
 - No personal data in prompts. API keys server-only in `.env.local` (git-ignored). Stripe webhook signature verified.
 - Server-side authorization on every order/thread route (only participants).
 - Basic content filter: Gemini safety settings on; block listings flagged as unsafe.
 - `AUDIT.md` records VEYZL findings and fixes per PR.
+
+### As built (Phase 9)
+- `/trust` is public and written in plain language. It covers:
+  - .edu-only sign-up with a one-time code;
+  - room numbers only in the private chat;
+  - the card is held, not charged, until the order is verified;
+  - how the photo check works (it compares your photo with the listing photos and checklist, reads any custom text, and small typos are fine);
+  - you always see the reasons;
+  - the check can only release payment, never refund or cancel;
+  - on a mismatch you choose accept, partial refund or cancel;
+  - proof photos are deleted once the order settles.
+- `/trust` and `/about` are linked from the homepage footer and the profile page (`components/site/SiteLinks.tsx`).
+- VEYZL / `AUDIT.md` is skipped for now (SPEC-NOTE).
 
 ---
 
@@ -710,10 +700,10 @@ getDueRebooks(buyerId): { shopId, listingId, lastAt, dueAt }[]
 - Each shop stores its category `treehouseVariant` (not currently displayed); demo buyers have avatars (one default hedgehog, one with sunglasses + hat).
 - 2–3 listings each with placeholder photos (upload a few royalty-free images to Cloudinary in the script, or use stable Unsplash URLs for seed only).
 - A mix of Verified counts and reviews so pages look alive.
-- Past orders for the demo buyer, including one haircut 30 days ago (rebook demo).
+- Past orders for the demo buyer (e.g. a Fade Lab haircut 30 days ago) with reviews.
 - For `berkeley.edu`: 1 demo buyer + 2 shops ("Bear Bites Bakery" — Food, "Sather Snaps" — Photography) so the university-theme switch shows on signup/login in the demo.
 
-**As built (Phase 5):** `npm run seed` (`scripts/seed.ts` + `scripts/seed-data.ts`) is idempotent — users by email, shops by slug, listings by shop + title, orders/reviews by `seedKey`. It creates the 8 UW and 2 Berkeley treehouses (27 listings), each with its category variant, a Verified count, review count and average. The demo seller (`demo.seller@uw.edu`) owns **Sweet Dorm Bakes** (Verified 13, matching the demo script); other sellers are `seed.*@uw.edu` / `seed.*@berkeley.edu`. Buyers: Maya `demo.buyer@uw.edu` (hedgehog in the acorn cap + classic black sunglasses), Theo `seed.theo@uw.edu` (plain hedgehog), Ava `demo.buyer@berkeley.edu` (plain). Six settled past orders with reviews and `buyer_memory` events, including Maya's Fade Lab skin fade 30 days ago. SPEC-NOTE: shop stats are set directly to stand for a longer history; only those six orders/reviews exist as records. Listing photos are stable Unsplash images (Unsplash License), each checked by eye to match its listing — Gemini image generation isn't available on this API key.
+**As built (Phase 5):** `npm run seed` (`scripts/seed.ts` + `scripts/seed-data.ts`) is idempotent — users by email, shops by slug, listings by shop + title, orders/reviews by `seedKey`. It creates the 8 UW and 2 Berkeley treehouses (27 listings), each with its category variant, a Verified count, review count and average. The demo seller (`demo.seller@uw.edu`) owns **Sweet Dorm Bakes** (Verified 13, matching the demo script); other sellers are `seed.*@uw.edu` / `seed.*@berkeley.edu`. Buyers: Maya `demo.buyer@uw.edu` (hedgehog in the acorn cap + classic black sunglasses), Theo `seed.theo@uw.edu` (plain hedgehog), Ava `demo.buyer@berkeley.edu` (plain). Six settled past orders with reviews, including Maya's Fade Lab skin fade 30 days ago. SPEC-NOTE: shop stats are set directly to stand for a longer history; only those six orders/reviews exist as records. Listing photos are stable Unsplash images (Unsplash License), each checked by eye to match its listing — Gemini image generation isn't available on this API key.
 
 Login shortcut: in dev only (`NODE_ENV !== "production"`), `/login` shows "Demo buyer / Demo seller" buttons that skip OTP — kept as a backup in case email is slow during the demo.
 
@@ -741,7 +731,7 @@ components/
               UniversityPicker, AccountTypeCard, EmptyState)
   app/       (MatchCard, StatBadge, ChatBox, PhotoUploader, SlotPicker, CheckResult, TabBar, BottomSheet)
 lib/
-  db.ts, session.ts, schools.ts, treehouse-variants.ts, stripe.ts, cloudinary.ts, memory.ts,
+  db.ts, session.ts, schools.ts, treehouse-variants.ts, stripe.ts, cloudinary.ts,
   release-decision.ts, rate-limit.ts, validators.ts
   ai/gemini.ts, ai/prompts.ts, ai/embeddings.ts
   vision/index.ts, vision/perceptron.ts, vision/gemini.ts
@@ -772,7 +762,6 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-BACKBOARD_API_KEY=
 RESEND_API_KEY=
 RESEND_FROM=Tree Dorm <onboarding@resend.dev>   # use an address on a verified domain to email any student
 APP_URL=http://localhost:3000
@@ -788,6 +777,13 @@ App must boot and the demo must work with only `MONGODB_URI`, `SESSION_SECRET`, 
 - **Business model:** 8% platform fee on captured payments (seller side), optional $4/mo "Featured Treehouse" boost. Start at UW, expand school by school via `.edu` domains.
 - **Why now:** students already buy from each other; gen-AI makes discovery conversational and verification cheap.
 - Show 3 numbers from seed data (shops, Verified orders, average rating) as a mock traction strip, clearly labeled "demo data".
+
+### As built (Phase 9)
+- `/about` is public. It has a "So far" strip labeled **Demo data**, with the note "These numbers come from our demo seed, not real customers."
+  - The strip shows the number of treehouses, the sum of shops' Verified counts, and the average rating weighted by review count (`lib/traction.ts`, live from MongoDB).
+  - Below the strip: problem, our answer, how we make money (8% fee on captured payments, $4/mo Featured Treehouse), where we start (UW, then school by school), and why now.
+  - It ends with Visit the village and Open your treehouse.
+- The copy follows the no-AI-labels rule (§4): it describes the photo check and matching without saying "AI".
 
 ---
 
@@ -832,9 +828,10 @@ Camera upload, VisionChecker (Perceptron first, Gemini fallback), `release-decis
 ✅ Matching cake + correct text → captured, counter +1. Wrong photo → reasons; partial refund captures the smaller amount.
 SPEC-NOTE: VEYZL/`AUDIT.md` skipped for now (by request).
 
-**Phase 9 — Rebook + trust + polish**
-Memory layer + rebook strip, `/trust`, `/about`, design acceptance pass (§9.14) on a real phone and desktop, Lighthouse mobile pass, accessibility pass.
-✅ Demo buyer sees "Time to rebook Fade Lab?"; every item in §9.14 checks out.
+**Phase 9 — Trust + polish**
+`/trust`, `/about`, design acceptance pass (§9.14) on a real phone and desktop, Lighthouse mobile pass, accessibility pass.
+✅ `/trust` and `/about` are linked and readable on a phone; every item in §9.14 checks out.
+SPEC-NOTE: rebook reminders and Backboard were removed from the product (by request), along with the old §10. Built in two steps. Done: `/trust`, `/about` and their links, checked at 390px. Still to do, in a separate design pass: the design acceptance pass (§9.14), Lighthouse and accessibility. VEYZL/`AUDIT.md` is skipped for now.
 
 **Phase 10 — Audit + ship**
 VEYZL on PRs, fix findings, fill `AUDIT.md`, `CREDITS.md` complete, README with setup + architecture diagram, GoDaddy domain.
@@ -846,7 +843,7 @@ VEYZL on PRs, fix findings, fill `AUDIT.md`, `CREDITS.md` complete, README with 
 Record on a real iPhone with the app installed to the home screen (full-screen, no browser bar), using iOS screen recording. Use two phones (buyer and seller) for the chat and booking parts if possible.
 
 1. Open the app → close-up treehouse → tap **"Open your treehouse"** → pick UW (page turns purple/gold, woodland stays) → code → **Business** on Carmel → choose Food → the bio arrives pre-filled → upload cake photos → the listing arrives pre-filled.
-2. Switch to the demo buyer → tap the **door** → it opens and you're carried inside to the Almond village with vines → hedgehog-in-sunglasses avatar in the header → "Rebook Fade Lab?" strip → ask AI "I need a birthday cake that says Happy Birthday Maya by Friday" → top 3 with reasons.
+2. Switch to the demo buyer → tap the **door** → it opens and you're carried inside to the Almond village with vines → hedgehog-in-sunglasses avatar in the header → ask AI "I need a birthday cake that says Happy Birthday Maya by Friday" → top 3 with reasons.
 3. Tap Sweet Dorm Bakes' treehouse → enter the storefront → book → Stripe test card → hold placed → quick chat ("I'm in McMahon 712").
 4. Snap proof photo of a matching cake → Perceptron reads the text → ✅ pass → payment captured, Verified 13 → 14.
 5. Show a mismatch with a wrong photo → reasons → partial refund.
