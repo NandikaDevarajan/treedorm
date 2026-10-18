@@ -3,12 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppHeader } from "@/components/app/AppHeader";
+import { CheckResult } from "@/components/check/CheckResult";
+import { ProofPhotoPanel } from "@/components/check/ProofPhotoPanel";
+import { ResolveChoices } from "@/components/check/ResolveChoices";
 import { ServiceDoneButton } from "@/components/orders/ServiceDoneButton";
+import { Creature } from "@/components/woodland/Creature";
 import { CreamCard } from "@/components/woodland/CreamCard";
 import { LeafyBackground } from "@/components/woodland/LeafyBackground";
 import { WoodButton } from "@/components/woodland/WoodButton";
 import { getSession } from "@/lib/auth";
 import { collections } from "@/lib/collections";
+import { CREATURE_FOR } from "@/lib/creatures";
 import { formatCents } from "@/lib/money";
 import { orderForUser } from "@/lib/order-access";
 import { STATUS_LABEL } from "@/lib/order-views";
@@ -33,11 +38,17 @@ export default async function OrderPage({
   const order = await syncOrderWithStripe(access.order);
   const { role } = access;
   const { paid } = await searchParams;
-  const { shops, listings } = await collections();
-  const [shop, listing] = await Promise.all([
+  const { shops, listings, reviews } = await collections();
+  const [shop, listing, review] = await Promise.all([
     shops.findOne({ _id: order.shopId }),
     listings.findOne({ _id: order.listingId }),
+    reviews.findOne({ orderId: order._id }),
   ]);
+  const shopName = shop?.name ?? "the seller";
+  const captured = order.stripe.capturedCents ?? order.amountCents;
+  const autoVerified = order.status === "captured" && order.resolution?.action === "auto_capture";
+  const canReview =
+    role === "buyer" && !review && (order.status === "captured" || order.status === "partially_refunded");
 
   const explain: Partial<Record<typeof order.status, string>> = {
     pending_payment: "Finish checkout to hold your spot. Unpaid bookings are released after 30 minutes.",
@@ -49,8 +60,17 @@ export default async function OrderPage({
       role === "buyer"
         ? "The seller marked this done. Next, snap a photo of the result so the payment can be released."
         : "Waiting for the buyer's proof photo. The payment is released when it matches the listing.",
-    captured: "Paid and Verified. Thanks for using Tree Dorm!",
-    canceled: "This order was canceled. Nothing was charged.",
+    checking: "Checking the proof photo…",
+    mismatch:
+      role === "buyer"
+        ? "The Photo check couldn't confirm a match. Your card is still held — choose what happens below."
+        : "The Photo check couldn't confirm a match. The payment is still held while the buyer decides.",
+    captured:
+      order.resolution?.action === "auto_capture"
+        ? `Verified by the Photo check. ${formatCents(captured)} sent to ${shopName}.`
+        : `Paid: ${formatCents(captured)} sent to ${shopName}.`,
+    partially_refunded: `Partly refunded: ${formatCents(captured)} sent to ${shopName}, ${formatCents(order.amountCents - captured)} released back to the buyer.`,
+    canceled: "This order was canceled and the hold was released. Nothing was charged.",
     expired: "This booking expired before payment. Nothing was charged.",
   };
 
@@ -71,6 +91,19 @@ export default async function OrderPage({
               Your card is held, not charged, until your order is verified. Say hi to the seller in your chat.
             </p>
           </div>
+        )}
+        {autoVerified && role === "buyer" && (
+          <section
+            role="status"
+            className="flex items-center gap-4 rounded-card border-2 border-leaf/50 bg-sage/40 p-5"
+          >
+            <Creature name={CREATURE_FOR.checkPassed} size={84} />
+            <div className="flex flex-col gap-1">
+              <p className="font-display text-3xl leading-tight text-bark">Verified!</p>
+              <p className="font-semibold">Payment sent to {shopName}.</p>
+              <p className="text-sm">Your proof photo matched the listing, so the payment went through.</p>
+            </div>
+          </section>
         )}
         <CreamCard className="flex flex-col gap-4 overflow-hidden p-0">
           {listing?.photos[0] && (
@@ -119,11 +152,34 @@ export default async function OrderPage({
           )}
           {role === "seller" && order.status === "authorized" && <ServiceDoneButton orderId={id} size="lg" />}
           {role === "buyer" && (order.status === "service_done" || order.status === "authorized") && (
-            // SPEC-NOTE: the proof-photo check is Phase 8.
-            <div className="rounded-2xl border-2 border-dashed border-bark/25 p-4 text-center">
-              <p className="font-semibold">Snap proof photo</p>
-              <p className="text-sm text-walnut/75">The photo check opens here after your service.</p>
-            </div>
+            <ProofPhotoPanel orderId={id} />
+          )}
+          {order.status === "checking" && (
+            <p role="status" className="flex items-center gap-3 rounded-2xl bg-cream px-4 py-3 font-semibold">
+              <Creature name={CREATURE_FOR.loading} size={40} /> Checking the proof photo…
+            </p>
+          )}
+          {order.check && order.status !== "captured" && <CheckResult check={order.check} />}
+          {order.status === "mismatch" && role === "buyer" && (
+            <ResolveChoices orderId={id} amountCents={order.amountCents} shopName={shopName} />
+          )}
+          {canReview && (
+            <CreamCard className="flex flex-col gap-2">
+              <h2 className="font-display text-3xl text-bark">How was it?</h2>
+              <p className="text-walnut/85">
+                Leave {shopName} a quick review — it helps other students choose.
+              </p>
+              <WoodButton href={`/orders/${id}/review`} size="lg">
+                Leave a review
+              </WoodButton>
+            </CreamCard>
+          )}
+          {review && (
+            <p className="rounded-2xl bg-cream px-4 py-3">
+              Your review: {"★".repeat(review.rating)}
+              <span className="text-walnut/40">{"★".repeat(5 - review.rating)}</span>
+              {review.body && <span className="block text-sm text-walnut/85">“{review.body}”</span>}
+            </p>
           )}
           {order.threadId && (
             <WoodButton href={`/messages/${order.threadId.toHexString()}`} variant="secondary" size="lg">

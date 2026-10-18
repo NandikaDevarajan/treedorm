@@ -113,3 +113,20 @@ export const orderCreateBody = z.object({
 });
 
 export const messageBody = z.object({ body: z.string().trim().min(1, "Write a message.").max(1000) });
+
+/** Proof photo for the photo check (SPEC §7 POST /api/orders/[id]/check). */
+export const checkBody = z.object({ proofPhoto: photoSchema });
+
+/** Buyer's choice after a mismatch (SPEC §7 POST /api/orders/[id]/resolve). */
+export const resolveBody = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("accept") }),
+  z.object({ action: z.literal("partial"), partialCents: z.number().int() }),
+  z.object({ action: z.literal("cancel") }),
+]);
+
+/** One review per settled order (SPEC §7 POST /api/reviews). */
+export const reviewBody = z.object({
+  orderId: z.string().min(1),
+  rating: z.number().int().min(1, "Pick 1 to 5 stars.").max(5),
+  body: z.string().trim().max(500, "Keep it under 500 characters.").default(""),
+});

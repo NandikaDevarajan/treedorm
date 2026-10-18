@@ -367,6 +367,15 @@ Rules:
 - Every decision is written to `audit_log` with inputs and outcome.
 Tests in `lib/__tests__/release-decision.test.ts` (Vitest) covering: pass high-conf, pass low-conf, mismatch, unsure, OCR mismatch, missing checkpoints, invalid status, partial bounds.
 
+**As built (Phase 8):**
+- **Checkers** (`lib/vision/`): `VisionChecker` interface in `types.ts`; `perceptron.ts` is the main checker — `POST https://api.perceptron.inc/v1/chat/completions`, `Authorization: Bearer ${PERCEPTRON_API_KEY}`, model `perceptron-mk1.5`, one user message with the listing photos (up to 3) then the proof photo as `image_url` parts (public Cloudinary/Unsplash URLs) plus the prompt, `response_format: { type: "json_schema", json_schema: { name: "photo_check", strict: true, schema } }` for `{ verdict, confidence, reasons[], ocrText }`, 45 s timeout, `finish_reason` must be `"stop"`. `gemini.ts` is the fallback (images sent inline). `index.ts runPhotoCheck` tries Perceptron whenever the key is set and falls back to Gemini on **any** error (HTTP error incl. 429 quota, timeout, bad JSON); if both fail the result is `unsure` (provider `"none"`), so the buyer decides. The checker used and the fallback reason are saved on `order.check` and in `audit_log`.
+- **Custom text** (`lib/text-match.ts`): matched in code from the checker's `ocrText` — case-insensitive, punctuation ignored, extra words around it allowed, at most 2 edits in total and at most 1 in short words (≤4 letters) so a different name ("Mia" for "Maya") doesn't pass. The text reason is written by us: "Text reads “Happy Birthday Maya” ✓" or "Expected the text “…”, photo reads “…” ✗".
+- **Release decision** (`lib/release-decision.ts`, pure): `decide()` → `auto_capture` only for verdict `pass`, confidence ≥ 0.80, custom text matched (when set) and ≥1 checkpoint; `ask_buyer` otherwise; `invalid` when the order isn't holding a payment. `resolveChoice()` → accept (capture full), partial (whole cents, > 0 and < total), cancel (release); only from `mismatch`; never more than authorized. Tests in `lib/__tests__/release-decision.test.ts` and `text-match.test.ts`.
+- **Flow**: `/orders/[id]` shows **Snap proof photo** to the buyer while `authorized` or `service_done` — `<input type="file" accept="image/*" capture="environment">` (camera on phones, file picker on desktop), shrunk to ≤1600 px, uploaded straight to Cloudinary (`POST /api/orders/[id]/proof-sign`, folder `treedorm/proofs/<orderId>`), then `POST /api/orders/[id]/check`. The order is claimed atomically (`checking`), so only one check runs. **Pass** → Stripe capture (`amount_to_capture` ≤ authorized, idempotency key), `captured`, `stats.aiVerified += 1`, chat note, and the page shows the fox sitting beside "Verified! Payment sent to [shop]" plus "Leave a review". **Mismatch/unsure** → `mismatch` with the reasons and how sure the check is, then **Accept anyway / Partial refund (amount input, "you get $x back") / Cancel** via `POST /api/orders/[id]/resolve` (locked with `settling` against double taps). Only an auto-pass adds to the Verified count.
+- **After settling**: proof photo deleted from Cloudinary, `proofPhoto` cleared, `settledAt` set, `resolution` saved, `audit_log` rows for the check and the money action (actor ai/buyer, provider, verdict, confidence, text match, authorized vs captured), buyer memory event added on capture (for rebooks, §10).
+- **Reviews**: `/orders/[id]/review` (1–5 stars + optional note ≤500 chars) → `POST /api/reviews`; buyer only, once per order (unique index), only `captured`/`partially_refunded`; shop `reviewCount`/`ratingAvg` updated atomically.
+- Wording is "Photo check" everywhere, no AI labels. SPEC-NOTE: the link from the check result to `/trust` arrives with that page in Phase 9.
+
 ---
 
 ## 9. Design — Woodland Treehouse Marketplace
@@ -819,8 +828,9 @@ Slot picker sheet, `POST /api/orders`, Stripe-hosted Checkout (manual capture), 
 SPEC-NOTE: VEYZL/`AUDIT.md` skipped for now (by request).
 
 **Phase 8 — Proof check + release**
-Camera upload, VisionChecker (Gemini first, then Perceptron), `release-decision.ts` + tests, capture/partial/cancel, photo deletion, audit_log, reviews, Verified counter.
+Camera upload, VisionChecker (Perceptron first, Gemini fallback), `release-decision.ts` + tests, capture/partial/cancel, photo deletion, audit_log, reviews, Verified counter.
 ✅ Matching cake + correct text → captured, counter +1. Wrong photo → reasons; partial refund captures the smaller amount.
+SPEC-NOTE: VEYZL/`AUDIT.md` skipped for now (by request).
 
 **Phase 9 — Rebook + trust + polish**
 Memory layer + rebook strip, `/trust`, `/about`, design acceptance pass (§9.14) on a real phone and desktop, Lighthouse mobile pass, accessibility pass.

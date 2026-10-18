@@ -67,13 +67,22 @@ export interface OrderDoc {
     capturedCents?: number;
   };
   check?: {
-    provider: "perceptron" | "gemini";
+    /** Which checker answered ("none" = both failed, so the buyer decides). */
+    provider: "perceptron" | "gemini" | "none";
     verdict: "pass" | "mismatch" | "unsure";
     confidence: number;
     reasons: string[];
     ocrText?: string;
+    /** Only when customText was set: whether the photo's text matched it. */
+    textMatched?: boolean;
+    /** Why Perceptron wasn't used, if it wasn't. */
+    fallbackReason?: string;
     checkedAt: Date;
   };
+  /** The buyer's proof photo; deleted from Cloudinary once the order settles (SPEC §11). */
+  proofPhoto?: Photo;
+  /** Set while a capture/cancel is in flight, so double taps can't settle twice. */
+  settling?: boolean;
   resolution?: {
     action: "auto_capture" | "accept" | "partial" | "cancel";
     byUserId: ObjectId | null;
@@ -117,6 +126,17 @@ export interface ReviewDoc {
   body: string;
   createdAt: Date;
   seedKey?: string;
+}
+
+/** Every money decision (SPEC §6, §8.5). */
+export interface AuditLogDoc {
+  _id: ObjectId;
+  orderId: ObjectId;
+  actor: "ai" | "buyer" | "system";
+  action: string;
+  inputs: Record<string, unknown>;
+  outcome: string;
+  at: Date;
 }
 
 /** Mongo fallback for buyer memory (SPEC §10). */
@@ -204,6 +224,7 @@ export function ensureIndexes(): Promise<unknown> {
       db.collection("messages").createIndex({ threadId: 1, createdAt: 1 }),
       db.collection("reviews").createIndex({ orderId: 1 }, { unique: true }),
       db.collection("buyer_memory").createIndex({ buyerId: 1 }, { unique: true }),
+      db.collection("audit_log").createIndex({ orderId: 1, at: 1 }),
     ]);
   })().catch((err) => {
     indexes = undefined;
@@ -227,6 +248,7 @@ export async function collections() {
     messages: db.collection<MessageDoc>("messages"),
     reviews: db.collection<ReviewDoc>("reviews"),
     buyerMemory: db.collection<BuyerMemoryDoc>("buyer_memory"),
+    auditLog: db.collection<AuditLogDoc>("audit_log"),
   };
 }
 

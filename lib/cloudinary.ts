@@ -14,6 +14,8 @@ function configured() {
 }
 
 export const listingFolder = (shopId: string) => `treedorm/listings/${shopId}`;
+/** Proof photos live apart from listing photos and are deleted once the order settles. */
+export const proofFolder = (orderId: string) => `treedorm/proofs/${orderId}`;
 
 /**
  * Signed params so the phone uploads straight to Cloudinary (SPEC §7 /api/uploads/sign); the API
